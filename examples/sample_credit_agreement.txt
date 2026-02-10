@@ -1,0 +1,21 @@
+CREDIT AGREEMENT
+
+Section 1.01 Defined Terms
+"Applicable Margin" means 2.25% per annum for SOFR loans.
+"Maturity Date" means March 31, 2031.
+"Leverage Ratio" means total funded debt divided by EBITDA.
+
+Section 2.01 Revolving Commitments
+Borrower may request up to $250 million revolving commitments.
+The interest rate will be Term SOFR plus Applicable Margin.
+
+Section 6.02 Financial Covenants
+Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.
+Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.
+
+Section 8.01 Events of Default
+Events of Default include payment default, bankruptcy default, and covenant default.
+A covenant default occurs when obligations in Section 6.02 are breached.
+
+Section 9.04 References
+For interest pricing, see Section 2.01 and Applicable Margin as defined in "Applicable Margin".

@@ -1,0 +1,5295 @@
+[
+  {
+    "tool": "load_documents",
+    "args": {
+      "documents": [
+        "examples/sample_credit_agreement.txt"
+      ]
+    },
+    "ok": true,
+    "output_preview": "{'documents': [{'doc_id': 'doc-0', 'path': 'examples/sample_credit_agreement.txt', 'name': 'sample_credit_agreement.txt', 'pages': ['CREDIT AGREEMENT\\n\\nSection 1.01 Defined Terms\\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\\n\"Maturity Date\" means March 31, 2031.\\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\\n\\nSection 2.01 Revolving Commitments\\nBorrower may request up to $250 million revolving commitments.\\nThe interest rate will be Term SOFR plus Applicable Margin"
+  },
+  {
+    "tool": "build_doc_map",
+    "args": {
+      "document_store": {
+        "documents": [
+          {
+            "doc_id": "doc-0",
+            "path": "examples/sample_credit_agreement.txt",
+            "name": "sample_credit_agreement.txt",
+            "pages": [
+              "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+            ],
+            "total_pages": 1
+          }
+        ]
+      }
+    },
+    "ok": true,
+    "output_preview": "{'document_store': {'documents': [{'doc_id': 'doc-0', 'path': 'examples/sample_credit_agreement.txt', 'name': 'sample_credit_agreement.txt', 'pages': ['CREDIT AGREEMENT\\n\\nSection 1.01 Defined Terms\\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\\n\"Maturity Date\" means March 31, 2031.\\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\\n\\nSection 2.01 Revolving Commitments\\nBorrower may request up to $250 million revolving commitments.\\nThe interest rate will be Term SOFR plu"
+  },
+  {
+    "tool": "extract_finance_signals",
+    "args": {
+      "text": "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\".",
+      "instruction": "Extract key financial and covenant terms from this agreement and answer the questions."
+    },
+    "ok": true,
+    "output_preview": "{'instruction': 'Extract key financial and covenant terms from this agreement and answer the questions.', 'signals': {'facility_amount': ['$250 million'], 'interest_terms': ['Margin', 'SOFR', 'interest rate'], 'covenants': ['Interest Coverage Ratio', 'Leverage Ratio'], 'events_of_default': ['Events of Default', 'default'], 'maturity': ['Maturity Date']}}"
+  },
+  {
+    "tool": "search_in_doc",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "query": "What is the facility amount?",
+      "scope": "doc",
+      "top_k": 6
+    },
+    "ok": true,
+    "output_preview": "[{'type': 'block', 'score': 3, 'anchor': 'doc-0:p1:b7', 'doc_id': 'doc-0', 'text': 'Borrower may request up to $250 million revolving commitments.'}]"
+  },
+  {
+    "tool": "append_reading_trail",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "anchor": "doc-0:p1:b7"
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'reading_trail_len': 1}"
+  },
+  {
+    "tool": "read_span",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "anchor": "doc-0:p1:b7"
+    },
+    "ok": true,
+    "output_preview": "{'doc_id': 'doc-0', 'anchors': ['doc-0:p1:b7'], 'text': 'Borrower may request up to $250 million revolving commitments.', 'spans': [{'anchor': 'doc-0:p1:b7', 'page': 1, 'block': 7, 'char_start': 0, 'char_end': 62}]}"
+  },
+  {
+    "tool": "write_scratchpad",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "key": "hit:doc-0:p1:b7",
+      "content": {
+        "question": "What is the facility amount?",
+        "scope": "doc",
+        "hit": {
+          "type": "block",
+          "score": 3,
+          "anchor": "doc-0:p1:b7",
+          "doc_id": "doc-0",
+          "text": "Borrower may request up to $250 million revolving commitments."
+        },
+        "span": {
+          "doc_id": "doc-0",
+          "anchors": [
+            "doc-0:p1:b7"
+          ],
+          "text": "Borrower may request up to $250 million revolving commitments.",
+          "spans": [
+            {
+              "anchor": "doc-0:p1:b7",
+              "page": 1,
+              "block": 7,
+              "char_start": 0,
+              "char_end": 62
+            }
+          ]
+        }
+      }
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'key': 'hit:doc-0:p1:b7'}"
+  },
+  {
+    "tool": "read_definition",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "term": "What",
+      "doc_id": "doc-0"
+    },
+    "ok": true,
+    "output_preview": "{'found': False, 'term': 'What'}"
+  },
+  {
+    "tool": "quote_evidence",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "anchors": [
+        "doc-0:p1:b7"
+      ]
+    },
+    "ok": true,
+    "output_preview": "[{'anchor': 'doc-0:p1:b7', 'doc_id': 'doc-0', 'page': 1, 'excerpt': 'Borrower may request up to $250 million revolving commitments.'}]"
+  },
+  {
+    "tool": "consistency_check",
+    "args": {
+      "claim": "What is the facility amount?",
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b7",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "Borrower may request up to $250 million revolving commitments."
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "{'status': 'not_supported', 'score': 0.0}"
+  },
+  {
+    "tool": "build_ops_answer",
+    "args": {
+      "question": "What is the facility amount?",
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b7",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "Borrower may request up to $250 million revolving commitments."
+        }
+      ],
+      "scratchpad": {
+        "hit:doc-0:p1:b7": {
+          "question": "What is the facility amount?",
+          "scope": "doc",
+          "hit": {
+            "type": "block",
+            "score": 3,
+            "anchor": "doc-0:p1:b7",
+            "doc_id": "doc-0",
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b7"
+            ],
+            "text": "Borrower may request up to $250 million revolving commitments.",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b7",
+                "page": 1,
+                "block": 7,
+                "char_start": 0,
+                "char_end": 62
+              }
+            ]
+          }
+        },
+        "hit:doc-0:p1:b9": {
+          "question": "What are the financial covenants?",
+          "scope": "section",
+          "hit": {
+            "type": "section",
+            "score": 5,
+            "anchor": "doc-0:p1:b9",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b9"
+            ],
+            "text": "Section 6.02 Financial Covenants",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b9",
+                "page": 1,
+                "block": 9,
+                "char_start": 0,
+                "char_end": 32
+              }
+            ]
+          }
+        },
+        "hit:doc-0:p1:b4": {
+          "question": "What is the maturity date?",
+          "scope": "doc",
+          "hit": {
+            "type": "block",
+            "score": 4,
+            "anchor": "doc-0:p1:b4",
+            "doc_id": "doc-0",
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b4"
+            ],
+            "text": "\"Maturity Date\" means March 31, 2031.",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b4",
+                "page": 1,
+                "block": 4,
+                "char_start": 0,
+                "char_end": 37
+              }
+            ]
+          }
+        }
+      },
+      "consistency": {
+        "status": "not_supported",
+        "score": 0.0
+      }
+    },
+    "ok": true,
+    "output_preview": "Question: What is the facility amount?\nAnswer basis (evidence):\n- [doc-0:p1:b7] (p1) Borrower may request up to $250 million revolving commitments.\nConsistency: not_supported (0.0)"
+  },
+  {
+    "tool": "search_in_doc",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "query": "What are the financial covenants?",
+      "scope": "section",
+      "top_k": 6
+    },
+    "ok": true,
+    "output_preview": "[{'type': 'section', 'score': 5, 'anchor': 'doc-0:p1:b9', 'doc_id': 'doc-0', 'section_no': '6.02', 'title': 'Financial Covenants', 'text': 'Section 6.02 Financial Covenants'}]"
+  },
+  {
+    "tool": "append_reading_trail",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "anchor": "doc-0:p1:b9"
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'reading_trail_len': 2}"
+  },
+  {
+    "tool": "read_span",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "anchor": "doc-0:p1:b9"
+    },
+    "ok": true,
+    "output_preview": "{'doc_id': 'doc-0', 'anchors': ['doc-0:p1:b9'], 'text': 'Section 6.02 Financial Covenants', 'spans': [{'anchor': 'doc-0:p1:b9', 'page': 1, 'block': 9, 'char_start': 0, 'char_end': 32}]}"
+  },
+  {
+    "tool": "follow_reference",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "ref_id": "xref-2"
+    },
+    "ok": true,
+    "output_preview": "{'resolved': True, 'anchor': 'doc-0:p1:b9', 'ref': {'id': 'xref-2', 'from_anchor': 'doc-0:p1:b9', 'ref_type': 'section_ref', 'target_text': '6.02', 'resolved_anchor': 'doc-0:p1:b9'}}"
+  },
+  {
+    "tool": "append_reading_trail",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "anchor": "doc-0:p1:b9"
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'reading_trail_len': 2}"
+  },
+  {
+    "tool": "read_span",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "anchor": "doc-0:p1:b9"
+    },
+    "ok": true,
+    "output_preview": "{'doc_id': 'doc-0', 'anchors': ['doc-0:p1:b9'], 'text': 'Section 6.02 Financial Covenants', 'spans': [{'anchor': 'doc-0:p1:b9', 'page': 1, 'block': 9, 'char_start': 0, 'char_end': 32}]}"
+  },
+  {
+    "tool": "write_scratchpad",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "key": "hit:doc-0:p1:b9",
+      "content": {
+        "question": "What are the financial covenants?",
+        "scope": "section",
+        "hit": {
+          "type": "section",
+          "score": 5,
+          "anchor": "doc-0:p1:b9",
+          "doc_id": "doc-0",
+          "section_no": "6.02",
+          "title": "Financial Covenants",
+          "text": "Section 6.02 Financial Covenants"
+        },
+        "span": {
+          "doc_id": "doc-0",
+          "anchors": [
+            "doc-0:p1:b9"
+          ],
+          "text": "Section 6.02 Financial Covenants",
+          "spans": [
+            {
+              "anchor": "doc-0:p1:b9",
+              "page": 1,
+              "block": 9,
+              "char_start": 0,
+              "char_end": 32
+            }
+          ]
+        }
+      }
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'key': 'hit:doc-0:p1:b9'}"
+  },
+  {
+    "tool": "read_definition",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "term": "What",
+      "doc_id": "doc-0"
+    },
+    "ok": true,
+    "output_preview": "{'found': False, 'term': 'What'}"
+  },
+  {
+    "tool": "quote_evidence",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "anchors": [
+        "doc-0:p1:b9"
+      ]
+    },
+    "ok": true,
+    "output_preview": "[{'anchor': 'doc-0:p1:b9', 'doc_id': 'doc-0', 'page': 1, 'excerpt': 'Section 6.02 Financial Covenants'}]"
+  },
+  {
+    "tool": "consistency_check",
+    "args": {
+      "claim": "What are the financial covenants?",
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b9",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "Section 6.02 Financial Covenants"
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "{'status': 'supported', 'score': 1.0}"
+  },
+  {
+    "tool": "build_ops_answer",
+    "args": {
+      "question": "What are the financial covenants?",
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b9",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "Section 6.02 Financial Covenants"
+        }
+      ],
+      "scratchpad": {
+        "hit:doc-0:p1:b7": {
+          "question": "What is the facility amount?",
+          "scope": "doc",
+          "hit": {
+            "type": "block",
+            "score": 3,
+            "anchor": "doc-0:p1:b7",
+            "doc_id": "doc-0",
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b7"
+            ],
+            "text": "Borrower may request up to $250 million revolving commitments.",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b7",
+                "page": 1,
+                "block": 7,
+                "char_start": 0,
+                "char_end": 62
+              }
+            ]
+          }
+        },
+        "hit:doc-0:p1:b9": {
+          "question": "What are the financial covenants?",
+          "scope": "section",
+          "hit": {
+            "type": "section",
+            "score": 5,
+            "anchor": "doc-0:p1:b9",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b9"
+            ],
+            "text": "Section 6.02 Financial Covenants",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b9",
+                "page": 1,
+                "block": 9,
+                "char_start": 0,
+                "char_end": 32
+              }
+            ]
+          }
+        },
+        "hit:doc-0:p1:b4": {
+          "question": "What is the maturity date?",
+          "scope": "doc",
+          "hit": {
+            "type": "block",
+            "score": 4,
+            "anchor": "doc-0:p1:b4",
+            "doc_id": "doc-0",
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b4"
+            ],
+            "text": "\"Maturity Date\" means March 31, 2031.",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b4",
+                "page": 1,
+                "block": 4,
+                "char_start": 0,
+                "char_end": 37
+              }
+            ]
+          }
+        }
+      },
+      "consistency": {
+        "status": "supported",
+        "score": 1.0
+      }
+    },
+    "ok": true,
+    "output_preview": "Question: What are the financial covenants?\nAnswer basis (evidence):\n- [doc-0:p1:b9] (p1) Section 6.02 Financial Covenants\nConsistency: supported (1.0)"
+  },
+  {
+    "tool": "search_in_doc",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "query": "What is the maturity date?",
+      "scope": "doc",
+      "top_k": 6
+    },
+    "ok": true,
+    "output_preview": "[{'type': 'definition', 'score': 4, 'anchor': 'doc-0:p1:b4', 'doc_id': 'doc-0', 'term': 'Maturity Date', 'text': 'March 31, 2031.'}, {'type': 'block', 'score': 4, 'anchor': 'doc-0:p1:b4', 'doc_id': 'doc-0', 'text': '\"Maturity Date\" means March 31, 2031.'}]"
+  },
+  {
+    "tool": "append_reading_trail",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "anchor": "doc-0:p1:b4"
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'reading_trail_len': 3}"
+  },
+  {
+    "tool": "read_span",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "anchor": "doc-0:p1:b4"
+    },
+    "ok": true,
+    "output_preview": "{'doc_id': 'doc-0', 'anchors': ['doc-0:p1:b4'], 'text': '\"Maturity Date\" means March 31, 2031.', 'spans': [{'anchor': 'doc-0:p1:b4', 'page': 1, 'block': 4, 'char_start': 0, 'char_end': 37}]}"
+  },
+  {
+    "tool": "write_scratchpad",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "key": "hit:doc-0:p1:b4",
+      "content": {
+        "question": "What is the maturity date?",
+        "scope": "doc",
+        "hit": {
+          "type": "definition",
+          "score": 4,
+          "anchor": "doc-0:p1:b4",
+          "doc_id": "doc-0",
+          "term": "Maturity Date",
+          "text": "March 31, 2031."
+        },
+        "span": {
+          "doc_id": "doc-0",
+          "anchors": [
+            "doc-0:p1:b4"
+          ],
+          "text": "\"Maturity Date\" means March 31, 2031.",
+          "spans": [
+            {
+              "anchor": "doc-0:p1:b4",
+              "page": 1,
+              "block": 4,
+              "char_start": 0,
+              "char_end": 37
+            }
+          ]
+        }
+      }
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'key': 'hit:doc-0:p1:b4'}"
+  },
+  {
+    "tool": "append_reading_trail",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "anchor": "doc-0:p1:b4"
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'reading_trail_len': 3}"
+  },
+  {
+    "tool": "read_span",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "anchor": "doc-0:p1:b4"
+    },
+    "ok": true,
+    "output_preview": "{'doc_id': 'doc-0', 'anchors': ['doc-0:p1:b4'], 'text': '\"Maturity Date\" means March 31, 2031.', 'spans': [{'anchor': 'doc-0:p1:b4', 'page': 1, 'block': 4, 'char_start': 0, 'char_end': 37}]}"
+  },
+  {
+    "tool": "write_scratchpad",
+    "args": {
+      "state": {
+        "scratchpad": {
+          "hit:doc-0:p1:b7": {
+            "question": "What is the facility amount?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 3,
+              "anchor": "doc-0:p1:b7",
+              "doc_id": "doc-0",
+              "text": "Borrower may request up to $250 million revolving commitments."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b7"
+              ],
+              "text": "Borrower may request up to $250 million revolving commitments.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b7",
+                  "page": 1,
+                  "block": 7,
+                  "char_start": 0,
+                  "char_end": 62
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b9": {
+            "question": "What are the financial covenants?",
+            "scope": "section",
+            "hit": {
+              "type": "section",
+              "score": 5,
+              "anchor": "doc-0:p1:b9",
+              "doc_id": "doc-0",
+              "section_no": "6.02",
+              "title": "Financial Covenants",
+              "text": "Section 6.02 Financial Covenants"
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b9"
+              ],
+              "text": "Section 6.02 Financial Covenants",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b9",
+                  "page": 1,
+                  "block": 9,
+                  "char_start": 0,
+                  "char_end": 32
+                }
+              ]
+            }
+          },
+          "hit:doc-0:p1:b4": {
+            "question": "What is the maturity date?",
+            "scope": "doc",
+            "hit": {
+              "type": "block",
+              "score": 4,
+              "anchor": "doc-0:p1:b4",
+              "doc_id": "doc-0",
+              "text": "\"Maturity Date\" means March 31, 2031."
+            },
+            "span": {
+              "doc_id": "doc-0",
+              "anchors": [
+                "doc-0:p1:b4"
+              ],
+              "text": "\"Maturity Date\" means March 31, 2031.",
+              "spans": [
+                {
+                  "anchor": "doc-0:p1:b4",
+                  "page": 1,
+                  "block": 4,
+                  "char_start": 0,
+                  "char_end": 37
+                }
+              ]
+            }
+          }
+        },
+        "reading_trail": [
+          "doc-0:p1:b7",
+          "doc-0:p1:b9",
+          "doc-0:p1:b4"
+        ],
+        "open_questions": []
+      },
+      "key": "hit:doc-0:p1:b4",
+      "content": {
+        "question": "What is the maturity date?",
+        "scope": "doc",
+        "hit": {
+          "type": "block",
+          "score": 4,
+          "anchor": "doc-0:p1:b4",
+          "doc_id": "doc-0",
+          "text": "\"Maturity Date\" means March 31, 2031."
+        },
+        "span": {
+          "doc_id": "doc-0",
+          "anchors": [
+            "doc-0:p1:b4"
+          ],
+          "text": "\"Maturity Date\" means March 31, 2031.",
+          "spans": [
+            {
+              "anchor": "doc-0:p1:b4",
+              "page": 1,
+              "block": 4,
+              "char_start": 0,
+              "char_end": 37
+            }
+          ]
+        }
+      }
+    },
+    "ok": true,
+    "output_preview": "{'ok': True, 'key': 'hit:doc-0:p1:b4'}"
+  },
+  {
+    "tool": "read_definition",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "term": "What",
+      "doc_id": "doc-0"
+    },
+    "ok": true,
+    "output_preview": "{'found': False, 'term': 'What'}"
+  },
+  {
+    "tool": "quote_evidence",
+    "args": {
+      "doc_map": {
+        "document_store": {
+          "documents": [
+            {
+              "doc_id": "doc-0",
+              "path": "examples/sample_credit_agreement.txt",
+              "name": "sample_credit_agreement.txt",
+              "pages": [
+                "CREDIT AGREEMENT\n\nSection 1.01 Defined Terms\n\"Applicable Margin\" means 2.25% per annum for SOFR loans.\n\"Maturity Date\" means March 31, 2031.\n\"Leverage Ratio\" means total funded debt divided by EBITDA.\n\nSection 2.01 Revolving Commitments\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus Applicable Margin.\n\nSection 6.02 Financial Covenants\nBorrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00.\nBorrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00.\n\nSection 8.01 Events of Default\nEvents of Default include payment default, bankruptcy default, and covenant default.\nA covenant default occurs when obligations in Section 6.02 are breached.\n\nSection 9.04 References\nFor interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+              ],
+              "total_pages": 1
+            }
+          ]
+        },
+        "sections": [
+          {
+            "id": "doc-0:section:1.01",
+            "doc_id": "doc-0",
+            "section_no": "1.01",
+            "title": "Defined Terms",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "doc-0:section:2.01",
+            "doc_id": "doc-0",
+            "section_no": "2.01",
+            "title": "Revolving Commitments",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "doc-0:section:6.02",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "doc-0:section:8.01",
+            "doc_id": "doc-0",
+            "section_no": "8.01",
+            "title": "Events of Default",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "doc-0:section:9.04",
+            "doc_id": "doc-0",
+            "section_no": "9.04",
+            "title": "References",
+            "level": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "anchor": "doc-0:p1:b15"
+          }
+        ],
+        "definitions": [
+          {
+            "id": "doc-0:def:applicable margin",
+            "doc_id": "doc-0",
+            "term": "Applicable Margin",
+            "anchor": "doc-0:p1:b3",
+            "text": "2.25% per annum for SOFR loans."
+          },
+          {
+            "id": "doc-0:def:maturity date",
+            "doc_id": "doc-0",
+            "term": "Maturity Date",
+            "anchor": "doc-0:p1:b4",
+            "text": "March 31, 2031."
+          },
+          {
+            "id": "doc-0:def:leverage ratio",
+            "doc_id": "doc-0",
+            "term": "Leverage Ratio",
+            "anchor": "doc-0:p1:b5",
+            "text": "total funded debt divided by EBITDA."
+          }
+        ],
+        "anchors": {
+          "doc-0:p1:b1": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 1,
+            "text": "CREDIT AGREEMENT"
+          },
+          "doc-0:p1:b2": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 2,
+            "text": "Section 1.01 Defined Terms"
+          },
+          "doc-0:p1:b3": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 3,
+            "text": "\"Applicable Margin\" means 2.25% per annum for SOFR loans."
+          },
+          "doc-0:p1:b4": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 4,
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "doc-0:p1:b5": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 5,
+            "text": "\"Leverage Ratio\" means total funded debt divided by EBITDA."
+          },
+          "doc-0:p1:b6": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 6,
+            "text": "Section 2.01 Revolving Commitments"
+          },
+          "doc-0:p1:b7": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 7,
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "doc-0:p1:b8": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 8,
+            "text": "The interest rate will be Term SOFR plus Applicable Margin."
+          },
+          "doc-0:p1:b9": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 9,
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "doc-0:p1:b10": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 10,
+            "text": "Borrower shall maintain a maximum Leverage Ratio of 4.50 to 1.00."
+          },
+          "doc-0:p1:b11": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 11,
+            "text": "Borrower shall maintain a minimum Interest Coverage Ratio of 3.00 to 1.00."
+          },
+          "doc-0:p1:b12": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 12,
+            "text": "Section 8.01 Events of Default"
+          },
+          "doc-0:p1:b13": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 13,
+            "text": "Events of Default include payment default, bankruptcy default, and covenant default."
+          },
+          "doc-0:p1:b14": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 14,
+            "text": "A covenant default occurs when obligations in Section 6.02 are breached."
+          },
+          "doc-0:p1:b15": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 15,
+            "text": "Section 9.04 References"
+          },
+          "doc-0:p1:b16": {
+            "doc_id": "doc-0",
+            "page": 1,
+            "block": 16,
+            "text": "For interest pricing, see Section 2.01 and Applicable Margin as defined in \"Applicable Margin\"."
+          }
+        },
+        "xrefs": [
+          {
+            "id": "xref-0",
+            "from_anchor": "doc-0:p1:b2",
+            "ref_type": "section_ref",
+            "target_text": "1.01",
+            "resolved_anchor": "doc-0:p1:b2"
+          },
+          {
+            "id": "xref-1",
+            "from_anchor": "doc-0:p1:b6",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-2",
+            "from_anchor": "doc-0:p1:b9",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-3",
+            "from_anchor": "doc-0:p1:b12",
+            "ref_type": "section_ref",
+            "target_text": "8.01",
+            "resolved_anchor": "doc-0:p1:b12"
+          },
+          {
+            "id": "xref-4",
+            "from_anchor": "doc-0:p1:b14",
+            "ref_type": "section_ref",
+            "target_text": "6.02",
+            "resolved_anchor": "doc-0:p1:b9"
+          },
+          {
+            "id": "xref-5",
+            "from_anchor": "doc-0:p1:b15",
+            "ref_type": "section_ref",
+            "target_text": "9.04",
+            "resolved_anchor": "doc-0:p1:b15"
+          },
+          {
+            "id": "xref-6",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "section_ref",
+            "target_text": "2.01",
+            "resolved_anchor": "doc-0:p1:b6"
+          },
+          {
+            "id": "xref-7",
+            "from_anchor": "doc-0:p1:b16",
+            "ref_type": "definition_ref",
+            "target_text": "Applicable Margin",
+            "resolved_anchor": "doc-0:p1:b3"
+          }
+        ]
+      },
+      "anchors": [
+        "doc-0:p1:b4"
+      ]
+    },
+    "ok": true,
+    "output_preview": "[{'anchor': 'doc-0:p1:b4', 'doc_id': 'doc-0', 'page': 1, 'excerpt': '\"Maturity Date\" means March 31, 2031.'}]"
+  },
+  {
+    "tool": "consistency_check",
+    "args": {
+      "claim": "What is the maturity date?",
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b4",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "\"Maturity Date\" means March 31, 2031."
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "{'status': 'supported', 'score': 1.0}"
+  },
+  {
+    "tool": "build_ops_answer",
+    "args": {
+      "question": "What is the maturity date?",
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b4",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "\"Maturity Date\" means March 31, 2031."
+        }
+      ],
+      "scratchpad": {
+        "hit:doc-0:p1:b7": {
+          "question": "What is the facility amount?",
+          "scope": "doc",
+          "hit": {
+            "type": "block",
+            "score": 3,
+            "anchor": "doc-0:p1:b7",
+            "doc_id": "doc-0",
+            "text": "Borrower may request up to $250 million revolving commitments."
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b7"
+            ],
+            "text": "Borrower may request up to $250 million revolving commitments.",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b7",
+                "page": 1,
+                "block": 7,
+                "char_start": 0,
+                "char_end": 62
+              }
+            ]
+          }
+        },
+        "hit:doc-0:p1:b9": {
+          "question": "What are the financial covenants?",
+          "scope": "section",
+          "hit": {
+            "type": "section",
+            "score": 5,
+            "anchor": "doc-0:p1:b9",
+            "doc_id": "doc-0",
+            "section_no": "6.02",
+            "title": "Financial Covenants",
+            "text": "Section 6.02 Financial Covenants"
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b9"
+            ],
+            "text": "Section 6.02 Financial Covenants",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b9",
+                "page": 1,
+                "block": 9,
+                "char_start": 0,
+                "char_end": 32
+              }
+            ]
+          }
+        },
+        "hit:doc-0:p1:b4": {
+          "question": "What is the maturity date?",
+          "scope": "doc",
+          "hit": {
+            "type": "block",
+            "score": 4,
+            "anchor": "doc-0:p1:b4",
+            "doc_id": "doc-0",
+            "text": "\"Maturity Date\" means March 31, 2031."
+          },
+          "span": {
+            "doc_id": "doc-0",
+            "anchors": [
+              "doc-0:p1:b4"
+            ],
+            "text": "\"Maturity Date\" means March 31, 2031.",
+            "spans": [
+              {
+                "anchor": "doc-0:p1:b4",
+                "page": 1,
+                "block": 4,
+                "char_start": 0,
+                "char_end": 37
+              }
+            ]
+          }
+        }
+      },
+      "consistency": {
+        "status": "supported",
+        "score": 1.0
+      }
+    },
+    "ok": true,
+    "output_preview": "Question: What is the maturity date?\nAnswer basis (evidence):\n- [doc-0:p1:b4] (p1) \"Maturity Date\" means March 31, 2031.\nConsistency: supported (1.0)"
+  },
+  {
+    "tool": "build_summary_report",
+    "args": {
+      "instruction": "Extract key financial and covenant terms from this agreement and answer the questions.",
+      "extraction": {
+        "instruction": "Extract key financial and covenant terms from this agreement and answer the questions.",
+        "signals": {
+          "facility_amount": [
+            "$250 million"
+          ],
+          "interest_terms": [
+            "Margin",
+            "SOFR",
+            "interest rate"
+          ],
+          "covenants": [
+            "Interest Coverage Ratio",
+            "Leverage Ratio"
+          ],
+          "events_of_default": [
+            "Events of Default",
+            "default"
+          ],
+          "maturity": [
+            "Maturity Date"
+          ]
+        }
+      },
+      "qa": [
+        {
+          "question": "What is the facility amount?",
+          "answer": "Question: What is the facility amount?\nAnswer basis (evidence):\n- [doc-0:p1:b7] (p1) Borrower may request up to $250 million revolving commitments.\nConsistency: not_supported (0.0)"
+        },
+        {
+          "question": "What are the financial covenants?",
+          "answer": "Question: What are the financial covenants?\nAnswer basis (evidence):\n- [doc-0:p1:b9] (p1) Section 6.02 Financial Covenants\nConsistency: supported (1.0)"
+        },
+        {
+          "question": "What is the maturity date?",
+          "answer": "Question: What is the maturity date?\nAnswer basis (evidence):\n- [doc-0:p1:b4] (p1) \"Maturity Date\" means March 31, 2031.\nConsistency: supported (1.0)"
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "# Agent Run Summary\n\n## Instruction\nExtract key financial and covenant terms from this agreement and answer the questions.\n\n## Extracted Signals\n- **facility_amount**: $250 million\n- **interest_terms**: Margin, SOFR, interest rate\n- **covenants**: Interest Coverage Ratio, Leverage Ratio\n- **events_of_default**: Events of Default, default\n- **maturity**: Maturity Date\n\n## Q&A\n### Q: What is the facility amount?\nQuestion: What is the facility amount?\nAnswer basis (evidence):\n- [doc-0:p1:b7] (p1) B"
+  }
+]

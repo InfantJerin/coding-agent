@@ -1,0 +1,99 @@
+{
+  "extraction": {
+    "instruction": "Extract key financial and covenant terms from this agreement and answer the questions.",
+    "signals": {
+      "facility_amount": [
+        "$250 million"
+      ],
+      "interest_terms": [
+        "Margin",
+        "SOFR",
+        "interest rate"
+      ],
+      "covenants": [
+        "Interest Coverage Ratio",
+        "Leverage Ratio"
+      ],
+      "events_of_default": [
+        "Events of Default",
+        "default"
+      ],
+      "maturity": [
+        "Maturity Date"
+      ]
+    }
+  },
+  "qa": [
+    {
+      "question": "What is the facility amount?",
+      "scope": "doc",
+      "answer": "Question: What is the facility amount?\nAnswer basis (evidence):\n- [doc-0:p1:b7] (p1) Borrower may request up to $250 million revolving commitments.\nConsistency: not_supported (0.0)",
+      "anchors": [
+        "doc-0:p1:b7"
+      ],
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b7",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "Borrower may request up to $250 million revolving commitments."
+        }
+      ],
+      "consistency": {
+        "status": "not_supported",
+        "score": 0.0
+      }
+    },
+    {
+      "question": "What are the financial covenants?",
+      "scope": "section",
+      "answer": "Question: What are the financial covenants?\nAnswer basis (evidence):\n- [doc-0:p1:b9] (p1) Section 6.02 Financial Covenants\nConsistency: supported (1.0)",
+      "anchors": [
+        "doc-0:p1:b9"
+      ],
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b9",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "Section 6.02 Financial Covenants"
+        }
+      ],
+      "consistency": {
+        "status": "supported",
+        "score": 1.0
+      }
+    },
+    {
+      "question": "What is the maturity date?",
+      "scope": "doc",
+      "answer": "Question: What is the maturity date?\nAnswer basis (evidence):\n- [doc-0:p1:b4] (p1) \"Maturity Date\" means March 31, 2031.\nConsistency: supported (1.0)",
+      "anchors": [
+        "doc-0:p1:b4"
+      ],
+      "evidence": [
+        {
+          "anchor": "doc-0:p1:b4",
+          "doc_id": "doc-0",
+          "page": 1,
+          "excerpt": "\"Maturity Date\" means March 31, 2031."
+        }
+      ],
+      "consistency": {
+        "status": "supported",
+        "score": 1.0
+      }
+    }
+  ],
+  "reading_trail": [
+    "doc-0:p1:b7",
+    "doc-0:p1:b9",
+    "doc-0:p1:b4"
+  ],
+  "open_questions": [],
+  "doc_map_summary": {
+    "sections": 5,
+    "definitions": 3,
+    "xrefs": 8
+  }
+}

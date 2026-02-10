@@ -1,0 +1,34 @@
+{
+  "success": true,
+  "message": "Completed run",
+  "artifacts": [
+    {
+      "name": "report",
+      "path": "output/run-1/summary_report.md"
+    },
+    {
+      "name": "json",
+      "path": "output/run-1/extraction.json"
+    },
+    {
+      "name": "trace",
+      "path": "output/run-1/run_trace.json"
+    }
+  ],
+  "task": {
+    "instruction": "Extract key financial and covenant terms from this agreement and answer the questions.",
+    "documents": [
+      "examples/sample_credit_agreement.txt"
+    ],
+    "questions": [
+      "What is the facility amount?",
+      "What are the financial covenants?",
+      "What is the maturity date?"
+    ],
+    "output_modes": [
+      "report",
+      "json"
+    ],
+    "metadata": {}
+  }
+}

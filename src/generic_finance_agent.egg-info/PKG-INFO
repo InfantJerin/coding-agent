@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: generic-finance-agent
+Version: 0.1.0
+Summary: Generic headless agent with pluggable finance tools
+Requires-Python: >=3.10
+Provides-Extra: pdf
+Requires-Dist: pypdf>=5.0.0; extra == "pdf"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"

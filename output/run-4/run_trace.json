@@ -1,0 +1,524 @@
+[
+  {
+    "tool": "load_documents",
+    "args": {
+      "documents": [
+        "examples/sample_credit_agreement.txt"
+      ]
+    },
+    "ok": true,
+    "output_preview": "\n\n# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default.\n"
+  },
+  {
+    "tool": "chunk_document",
+    "args": {
+      "text": "\n\n# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default.\n"
+    },
+    "ok": true,
+    "output_preview": "[{'chunk_id': 'chunk-0', 'start': 0, 'end': 413, 'text': '# FILE: sample_credit_agreement.txt\\n\\nCREDIT AGREEMENT\\n\\nBorrower may request up to $250 million revolving commitments.\\nThe interest rate will be Term SOFR plus applicable margin.\\nThe maturity date is March 31, 2031.\\n\\nFinancial Covenants:\\n- Maximum Leverage Ratio of 4.50 to 1.00\\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\\n\\nEvents of Default include payment default, bankruptcy default, and covenant default.'}]"
+  },
+  {
+    "tool": "build_chunk_index",
+    "args": {
+      "chunks": [
+        {
+          "chunk_id": "chunk-0",
+          "start": 0,
+          "end": 413,
+          "text": "# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default."
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "{'chunks': [{'chunk_id': 'chunk-0', 'start': 0, 'end': 413, 'text': '# FILE: sample_credit_agreement.txt\\n\\nCREDIT AGREEMENT\\n\\nBorrower may request up to $250 million revolving commitments.\\nThe interest rate will be Term SOFR plus applicable margin.\\nThe maturity date is March 31, 2031.\\n\\nFinancial Covenants:\\n- Maximum Leverage Ratio of 4.50 to 1.00\\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\\n\\nEvents of Default include payment default, bankruptcy default, and covenant default.'}], '"
+  },
+  {
+    "tool": "extract_finance_signals",
+    "args": {
+      "text": "\n\n# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default.\n",
+      "instruction": "Extract key financial and covenant terms from this agreement and answer the questions."
+    },
+    "ok": true,
+    "output_preview": "{'instruction': 'Extract key financial and covenant terms from this agreement and answer the questions.', 'signals': {'facility_amount': ['$250 million'], 'interest_terms': ['SOFR', 'interest rate', 'margin'], 'covenants': ['Interest Coverage Ratio', 'Leverage Ratio'], 'events_of_default': ['Events of Default', 'default'], 'maturity': ['maturity date']}, 'highlights': ['The interest rate will be Term SOFR plus applicable margin.', 'The maturity date is March 31, 2031.', 'Financial Covenants:', '"
+  },
+  {
+    "tool": "retrieve_chunks",
+    "args": {
+      "query": "What is the facility amount?",
+      "index": {
+        "chunks": [
+          {
+            "chunk_id": "chunk-0",
+            "start": 0,
+            "end": 413,
+            "text": "# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default."
+          }
+        ],
+        "tf": {
+          "chunk-0": {
+            "file": 1,
+            "sample": 1,
+            "credit": 2,
+            "agreement": 2,
+            "txt": 1,
+            "borrower": 1,
+            "may": 1,
+            "request": 1,
+            "up": 1,
+            "to": 3,
+            "250": 1,
+            "million": 1,
+            "revolving": 1,
+            "commitments": 1,
+            "the": 2,
+            "interest": 2,
+            "rate": 1,
+            "will": 1,
+            "be": 1,
+            "term": 1,
+            "sofr": 1,
+            "plus": 1,
+            "applicable": 1,
+            "margin": 1,
+            "maturity": 1,
+            "date": 1,
+            "is": 1,
+            "march": 1,
+            "31": 1,
+            "2031": 1,
+            "financial": 1,
+            "covenants": 1,
+            "maximum": 1,
+            "leverage": 1,
+            "ratio": 2,
+            "of": 3,
+            "50": 1,
+            "00": 3,
+            "minimum": 1,
+            "coverage": 1,
+            "events": 1,
+            "default": 4,
+            "include": 1,
+            "payment": 1,
+            "bankruptcy": 1,
+            "and": 1,
+            "covenant": 1
+          }
+        },
+        "df": {
+          "file": 1,
+          "sample": 1,
+          "credit": 1,
+          "agreement": 1,
+          "txt": 1,
+          "borrower": 1,
+          "may": 1,
+          "request": 1,
+          "up": 1,
+          "to": 1,
+          "250": 1,
+          "million": 1,
+          "revolving": 1,
+          "commitments": 1,
+          "the": 1,
+          "interest": 1,
+          "rate": 1,
+          "will": 1,
+          "be": 1,
+          "term": 1,
+          "sofr": 1,
+          "plus": 1,
+          "applicable": 1,
+          "margin": 1,
+          "maturity": 1,
+          "date": 1,
+          "is": 1,
+          "march": 1,
+          "31": 1,
+          "2031": 1,
+          "financial": 1,
+          "covenants": 1,
+          "maximum": 1,
+          "leverage": 1,
+          "ratio": 1,
+          "of": 1,
+          "50": 1,
+          "00": 1,
+          "minimum": 1,
+          "coverage": 1,
+          "events": 1,
+          "default": 1,
+          "include": 1,
+          "payment": 1,
+          "bankruptcy": 1,
+          "and": 1,
+          "covenant": 1
+        },
+        "lengths": {
+          "chunk-0": 61
+        },
+        "avg_len": 61.0,
+        "doc_count": 1
+      },
+      "top_k": 5
+    },
+    "ok": true,
+    "output_preview": "[{'chunk_id': 'chunk-0', 'score': 0.698656, 'start': 0, 'end': 413, 'text': '# FILE: sample_credit_agreement.txt\\n\\nCREDIT AGREEMENT\\n\\nBorrower may request up to $250 million revolving commitments.\\nThe interest rate will be Term SOFR plus applicable margin.\\nThe maturity date is March 31, 2031.\\n\\nFinancial Covenants:\\n- Maximum Leverage Ratio of 4.50 to 1.00\\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\\n\\nEvents of Default include payment default, bankruptcy default, and covenant defaul"
+  },
+  {
+    "tool": "answer_question_from_text",
+    "args": {
+      "text": "\n\n# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default.\n",
+      "question": "What is the facility amount?",
+      "retrieved_chunks": [
+        {
+          "chunk_id": "chunk-0",
+          "score": 0.698656,
+          "start": 0,
+          "end": 413,
+          "text": "# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default."
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "Best retrieved evidence:\n- [chunk-0] CREDIT AGREEMENT"
+  },
+  {
+    "tool": "retrieve_chunks",
+    "args": {
+      "query": "What are the financial covenants?",
+      "index": {
+        "chunks": [
+          {
+            "chunk_id": "chunk-0",
+            "start": 0,
+            "end": 413,
+            "text": "# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default."
+          }
+        ],
+        "tf": {
+          "chunk-0": {
+            "file": 1,
+            "sample": 1,
+            "credit": 2,
+            "agreement": 2,
+            "txt": 1,
+            "borrower": 1,
+            "may": 1,
+            "request": 1,
+            "up": 1,
+            "to": 3,
+            "250": 1,
+            "million": 1,
+            "revolving": 1,
+            "commitments": 1,
+            "the": 2,
+            "interest": 2,
+            "rate": 1,
+            "will": 1,
+            "be": 1,
+            "term": 1,
+            "sofr": 1,
+            "plus": 1,
+            "applicable": 1,
+            "margin": 1,
+            "maturity": 1,
+            "date": 1,
+            "is": 1,
+            "march": 1,
+            "31": 1,
+            "2031": 1,
+            "financial": 1,
+            "covenants": 1,
+            "maximum": 1,
+            "leverage": 1,
+            "ratio": 2,
+            "of": 3,
+            "50": 1,
+            "00": 3,
+            "minimum": 1,
+            "coverage": 1,
+            "events": 1,
+            "default": 4,
+            "include": 1,
+            "payment": 1,
+            "bankruptcy": 1,
+            "and": 1,
+            "covenant": 1
+          }
+        },
+        "df": {
+          "file": 1,
+          "sample": 1,
+          "credit": 1,
+          "agreement": 1,
+          "txt": 1,
+          "borrower": 1,
+          "may": 1,
+          "request": 1,
+          "up": 1,
+          "to": 1,
+          "250": 1,
+          "million": 1,
+          "revolving": 1,
+          "commitments": 1,
+          "the": 1,
+          "interest": 1,
+          "rate": 1,
+          "will": 1,
+          "be": 1,
+          "term": 1,
+          "sofr": 1,
+          "plus": 1,
+          "applicable": 1,
+          "margin": 1,
+          "maturity": 1,
+          "date": 1,
+          "is": 1,
+          "march": 1,
+          "31": 1,
+          "2031": 1,
+          "financial": 1,
+          "covenants": 1,
+          "maximum": 1,
+          "leverage": 1,
+          "ratio": 1,
+          "of": 1,
+          "50": 1,
+          "00": 1,
+          "minimum": 1,
+          "coverage": 1,
+          "events": 1,
+          "default": 1,
+          "include": 1,
+          "payment": 1,
+          "bankruptcy": 1,
+          "and": 1,
+          "covenant": 1
+        },
+        "lengths": {
+          "chunk-0": 61
+        },
+        "avg_len": 61.0,
+        "doc_count": 1
+      },
+      "top_k": 5
+    },
+    "ok": true,
+    "output_preview": "[{'chunk_id': 'chunk-0', 'score': 0.986339, 'start': 0, 'end': 413, 'text': '# FILE: sample_credit_agreement.txt\\n\\nCREDIT AGREEMENT\\n\\nBorrower may request up to $250 million revolving commitments.\\nThe interest rate will be Term SOFR plus applicable margin.\\nThe maturity date is March 31, 2031.\\n\\nFinancial Covenants:\\n- Maximum Leverage Ratio of 4.50 to 1.00\\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\\n\\nEvents of Default include payment default, bankruptcy default, and covenant defaul"
+  },
+  {
+    "tool": "answer_question_from_text",
+    "args": {
+      "text": "\n\n# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default.\n",
+      "question": "What are the financial covenants?",
+      "retrieved_chunks": [
+        {
+          "chunk_id": "chunk-0",
+          "score": 0.986339,
+          "start": 0,
+          "end": 413,
+          "text": "# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default."
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "Best retrieved evidence:\n- [chunk-0] Financial Covenants:"
+  },
+  {
+    "tool": "retrieve_chunks",
+    "args": {
+      "query": "What is the maturity date?",
+      "index": {
+        "chunks": [
+          {
+            "chunk_id": "chunk-0",
+            "start": 0,
+            "end": 413,
+            "text": "# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default."
+          }
+        ],
+        "tf": {
+          "chunk-0": {
+            "file": 1,
+            "sample": 1,
+            "credit": 2,
+            "agreement": 2,
+            "txt": 1,
+            "borrower": 1,
+            "may": 1,
+            "request": 1,
+            "up": 1,
+            "to": 3,
+            "250": 1,
+            "million": 1,
+            "revolving": 1,
+            "commitments": 1,
+            "the": 2,
+            "interest": 2,
+            "rate": 1,
+            "will": 1,
+            "be": 1,
+            "term": 1,
+            "sofr": 1,
+            "plus": 1,
+            "applicable": 1,
+            "margin": 1,
+            "maturity": 1,
+            "date": 1,
+            "is": 1,
+            "march": 1,
+            "31": 1,
+            "2031": 1,
+            "financial": 1,
+            "covenants": 1,
+            "maximum": 1,
+            "leverage": 1,
+            "ratio": 2,
+            "of": 3,
+            "50": 1,
+            "00": 3,
+            "minimum": 1,
+            "coverage": 1,
+            "events": 1,
+            "default": 4,
+            "include": 1,
+            "payment": 1,
+            "bankruptcy": 1,
+            "and": 1,
+            "covenant": 1
+          }
+        },
+        "df": {
+          "file": 1,
+          "sample": 1,
+          "credit": 1,
+          "agreement": 1,
+          "txt": 1,
+          "borrower": 1,
+          "may": 1,
+          "request": 1,
+          "up": 1,
+          "to": 1,
+          "250": 1,
+          "million": 1,
+          "revolving": 1,
+          "commitments": 1,
+          "the": 1,
+          "interest": 1,
+          "rate": 1,
+          "will": 1,
+          "be": 1,
+          "term": 1,
+          "sofr": 1,
+          "plus": 1,
+          "applicable": 1,
+          "margin": 1,
+          "maturity": 1,
+          "date": 1,
+          "is": 1,
+          "march": 1,
+          "31": 1,
+          "2031": 1,
+          "financial": 1,
+          "covenants": 1,
+          "maximum": 1,
+          "leverage": 1,
+          "ratio": 1,
+          "of": 1,
+          "50": 1,
+          "00": 1,
+          "minimum": 1,
+          "coverage": 1,
+          "events": 1,
+          "default": 1,
+          "include": 1,
+          "payment": 1,
+          "bankruptcy": 1,
+          "and": 1,
+          "covenant": 1
+        },
+        "lengths": {
+          "chunk-0": 61
+        },
+        "avg_len": 61.0,
+        "doc_count": 1
+      },
+      "top_k": 5
+    },
+    "ok": true,
+    "output_preview": "[{'chunk_id': 'chunk-0', 'score': 1.274021, 'start': 0, 'end': 413, 'text': '# FILE: sample_credit_agreement.txt\\n\\nCREDIT AGREEMENT\\n\\nBorrower may request up to $250 million revolving commitments.\\nThe interest rate will be Term SOFR plus applicable margin.\\nThe maturity date is March 31, 2031.\\n\\nFinancial Covenants:\\n- Maximum Leverage Ratio of 4.50 to 1.00\\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\\n\\nEvents of Default include payment default, bankruptcy default, and covenant defaul"
+  },
+  {
+    "tool": "answer_question_from_text",
+    "args": {
+      "text": "\n\n# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default.\n",
+      "question": "What is the maturity date?",
+      "retrieved_chunks": [
+        {
+          "chunk_id": "chunk-0",
+          "score": 1.274021,
+          "start": 0,
+          "end": 413,
+          "text": "# FILE: sample_credit_agreement.txt\n\nCREDIT AGREEMENT\n\nBorrower may request up to $250 million revolving commitments.\nThe interest rate will be Term SOFR plus applicable margin.\nThe maturity date is March 31, 2031.\n\nFinancial Covenants:\n- Maximum Leverage Ratio of 4.50 to 1.00\n- Minimum Interest Coverage Ratio of 3.00 to 1.00\n\nEvents of Default include payment default, bankruptcy default, and covenant default."
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "Best retrieved evidence:\n- [chunk-0] The maturity date is March 31, 2031."
+  },
+  {
+    "tool": "build_summary_report",
+    "args": {
+      "instruction": "Extract key financial and covenant terms from this agreement and answer the questions.",
+      "extraction": {
+        "instruction": "Extract key financial and covenant terms from this agreement and answer the questions.",
+        "signals": {
+          "facility_amount": [
+            "$250 million"
+          ],
+          "interest_terms": [
+            "SOFR",
+            "interest rate",
+            "margin"
+          ],
+          "covenants": [
+            "Interest Coverage Ratio",
+            "Leverage Ratio"
+          ],
+          "events_of_default": [
+            "Events of Default",
+            "default"
+          ],
+          "maturity": [
+            "maturity date"
+          ]
+        },
+        "highlights": [
+          "The interest rate will be Term SOFR plus applicable margin.",
+          "The maturity date is March 31, 2031.",
+          "Financial Covenants:",
+          "- Minimum Interest Coverage Ratio of 3.00 to 1.00",
+          "Events of Default include payment default, bankruptcy default, and covenant default."
+        ],
+        "document_length_chars": 416
+      },
+      "qa": [
+        {
+          "question": "What is the facility amount?",
+          "answer": "Best retrieved evidence:\n- [chunk-0] CREDIT AGREEMENT"
+        },
+        {
+          "question": "What are the financial covenants?",
+          "answer": "Best retrieved evidence:\n- [chunk-0] Financial Covenants:"
+        },
+        {
+          "question": "What is the maturity date?",
+          "answer": "Best retrieved evidence:\n- [chunk-0] The maturity date is March 31, 2031."
+        }
+      ]
+    },
+    "ok": true,
+    "output_preview": "# Agent Run Summary\n\n## Instruction\nExtract key financial and covenant terms from this agreement and answer the questions.\n\n## Extracted Signals\n- **facility_amount**: $250 million\n- **interest_terms**: SOFR, interest rate, margin\n- **covenants**: Interest Coverage Ratio, Leverage Ratio\n- **events_of_default**: Events of Default, default\n- **maturity**: maturity date\n\n## Highlighted Clauses\n- The interest rate will be Term SOFR plus applicable margin.\n- The maturity date is March 31, 2031.\n- Fin"
+  }
+]
