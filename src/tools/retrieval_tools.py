@@ -39,6 +39,61 @@ class ChunkDocumentTool:
         return chunks
 
 
+class ChunkDocMapSectionsTool:
+    name = "chunk_doc_map_sections"
+
+    def run(self, doc_map: dict[str, Any], max_chars: int = 1200) -> list[dict[str, Any]]:
+        chunks: list[dict[str, Any]] = []
+        for section in doc_map.get("sections", []):
+            doc_id = section.get("doc_id", "")
+            section_no = section.get("section_no", "")
+            title = section.get("title", "")
+            start = int(section.get("page_start", 1))
+            end = int(section.get("page_end", start))
+            anchors = []
+            texts = []
+            for anchor, data in doc_map.get("anchors", {}).items():
+                if data.get("doc_id") != doc_id:
+                    continue
+                page = int(data.get("page", 0))
+                if start <= page <= end:
+                    anchors.append(anchor)
+                    texts.append(str(data.get("text", "")))
+            joined = " ".join(texts).strip()
+            if not joined:
+                continue
+            chunk_text = joined[:max_chars]
+            chunks.append(
+                {
+                    "chunk_id": f"{doc_id}:{section_no}",
+                    "doc_id": doc_id,
+                    "section_no": section_no,
+                    "title": title,
+                    "start_page": start,
+                    "end_page": end,
+                    "anchors": anchors[:20],
+                    "text": chunk_text,
+                }
+            )
+
+        for definition in doc_map.get("definitions", []):
+            chunk_id = f"{definition.get('doc_id')}::def::{definition.get('term')}"
+            text = f"{definition.get('term')} means {definition.get('text', '')}".strip()[:max_chars]
+            chunks.append(
+                {
+                    "chunk_id": chunk_id,
+                    "doc_id": definition.get("doc_id"),
+                    "section_no": "DEFINITIONS",
+                    "title": definition.get("term"),
+                    "start_page": None,
+                    "end_page": None,
+                    "anchors": [definition.get("anchor")],
+                    "text": text,
+                }
+            )
+        return chunks
+
+
 class BuildChunkIndexTool:
     name = "build_chunk_index"
 
@@ -104,13 +159,14 @@ class RetrieveChunksTool:
         results: list[dict[str, Any]] = []
         for score, cid in scored[:top_k]:
             chunk = chunks[cid]
-            results.append(
-                {
-                    "chunk_id": cid,
-                    "score": round(score, 6),
-                    "start": chunk["start"],
-                    "end": chunk["end"],
-                    "text": chunk["text"],
-                }
-            )
+            row = {"chunk_id": cid, "score": round(score, 6), "text": chunk["text"]}
+            if "start" in chunk:
+                row["start"] = chunk["start"]
+            if "end" in chunk:
+                row["end"] = chunk["end"]
+            if "section_no" in chunk:
+                row["section_no"] = chunk.get("section_no")
+                row["title"] = chunk.get("title")
+                row["anchors"] = chunk.get("anchors", [])
+            results.append(row)
         return results

@@ -44,3 +44,23 @@ class ToolPolicy:
             raise PermissionError(f"Tool '{tool_name}' is denied by policy")
         if not self._matches(normalized, allow):
             raise PermissionError(f"Tool '{tool_name}' is not allowed by policy")
+
+    def merged(self, override: "ToolPolicy | None" = None) -> "ToolPolicy":
+        if override is None:
+            return ToolPolicy(allow=list(self.allow or ["*"]), deny=list(self.deny or []))
+
+        base_allow = list(self.allow or ["*"])
+        base_deny = list(self.deny or [])
+        over_allow = list(override.allow or ["*"])
+        over_deny = list(override.deny or [])
+
+        # Explicit task-level allow narrows accessible tools.
+        if over_allow == ["*"]:
+            allow = base_allow
+        elif base_allow == ["*"]:
+            allow = over_allow
+        else:
+            allow = [item for item in base_allow if item in set(over_allow)]
+        # Deny always wins and composes additively.
+        deny = sorted(set(base_deny + over_deny))
+        return ToolPolicy(allow=allow, deny=deny)

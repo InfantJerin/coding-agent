@@ -30,6 +30,18 @@ class FinanceToolsTests(unittest.TestCase):
         self.assertIn("field_extraction", output)
         self.assertIn("facility_amount", output["field_extraction"])
         self.assertIn("consistency", output)
+        self.assertIn("warnings", output["consistency"])
+        self.assertIn("unresolved_dependencies", output["field_extraction"]["facility_amount"])
+
+    def test_no_doc_map_returns_skipped_consistency(self) -> None:
+        tool = ExtractFinanceSignalsTool()
+        output = tool.run(
+            text="No structured map is available here.",
+            instruction="Extract for compliance certificate",
+            doc_map=None,
+            document_type="compliance_certificate",
+        )
+        self.assertEqual(output["consistency"]["status"], "skipped")
 
 
 if __name__ == "__main__":

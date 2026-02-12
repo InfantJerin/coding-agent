@@ -4,7 +4,9 @@ import datetime as dt
 import re
 from typing import Any
 
+from agent_core.models import ConsistencyResult, ExtractionEvidence, ExtractionField
 from llm.providers import LLMClient
+from schemas.finance_registry import list_document_types, resolve_schema
 
 
 class ExtractFinanceSignalsTool:
@@ -21,79 +23,15 @@ class ExtractFinanceSignalsTool:
         "maturity": re.compile(r"maturity date|termination date|expires? on", re.IGNORECASE),
     }
 
-    _schemas: dict[str, dict[str, Any]] = {
-        "credit_agreement": {
-            "version": "v1",
-            "fields": [
-                {
-                    "name": "facility_amount",
-                    "required": True,
-                    "section_hints": ["commitments", "the commitments", "facility", "loans", "amount"],
-                    "term_hints": ["facility", "commitment", "loan", "amount"],
-                    "pattern": r"\$\s?\d[\d,]*(?:\.\d+)?\s?(?:million|billion|m)?",
-                },
-                {
-                    "name": "maturity_date",
-                    "required": True,
-                    "section_hints": ["maturity", "termination", "term", "repayment"],
-                    "term_hints": ["maturity", "termination", "repayment"],
-                    "pattern": r"(?:maturity date is|maturity date|terminates? on|termination date is)\s+([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})",
-                },
-                {
-                    "name": "interest_benchmark",
-                    "required": False,
-                    "section_hints": ["interest", "benchmark", "rate", "applicable margin", "pricing"],
-                    "term_hints": ["sofr", "libor", "base rate", "prime rate", "interest rate"],
-                    "pattern": r"(SOFR|LIBOR|Base Rate|Prime Rate)",
-                },
-                {
-                    "name": "conditions_precedent",
-                    "required": False,
-                    "section_hints": ["conditions precedent", "conditions to borrowing", "borrowing", "advances"],
-                    "term_hints": ["condition precedent", "conditions", "borrowing", "request", "notice"],
-                },
-                {
-                    "name": "excess_cash_flow_definition",
-                    "required": False,
-                    "section_hints": ["definitions", "defined terms"],
-                    "term_hints": ["excess cash flow", "means"],
-                },
-            ],
-        },
-        "compliance_certificate": {
-            "version": "v1",
-            "fields": [
-                {
-                    "name": "reporting_period_end",
-                    "required": True,
-                    "section_hints": ["reporting period", "period end", "fiscal quarter"],
-                    "term_hints": ["period", "quarter", "ended", "as of"],
-                    "pattern": r"(?:for the period ended|as of)\s+([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})",
-                },
-                {
-                    "name": "leverage_ratio",
-                    "required": True,
-                    "section_hints": ["financial covenant", "leverage ratio", "ratio"],
-                    "term_hints": ["leverage ratio", "total leverage", "ratio"],
-                    "pattern": r"(\d+(?:\.\d+)?x)",
-                },
-                {
-                    "name": "compliance_status",
-                    "required": True,
-                    "section_hints": ["compliance", "certification", "officer certificate"],
-                    "term_hints": ["in compliance", "not in compliance", "complies", "default"],
-                    "pattern": r"(in compliance|not in compliance|complies|does not comply)",
-                },
-            ],
-        },
-    }
-
     def _resolve_doc_type(self, instruction: str, text: str, document_type: str | None) -> str:
-        if document_type and document_type in self._schemas:
+        known_types = list_document_types()
+        if document_type and document_type in known_types:
             return document_type
         hay = f"{instruction}\n{text}".lower()
         if "compliance certificate" in hay:
             return "compliance_certificate"
+        if "rate notice" in hay:
+            return "rate_notice"
         return "credit_agreement"
 
     def _match_score(self, haystack: str, needles: list[str]) -> int:
@@ -171,6 +109,34 @@ class ExtractFinanceSignalsTool:
                 continue
         return None
 
+    def _validate_contract(
+        self,
+        *,
+        extraction: dict[str, Any],
+        schema: dict[str, Any],
+        field_rows: dict[str, ExtractionField],
+        consistency: ConsistencyResult,
+    ) -> None:
+        required_keys = {"instruction", "signals", "document_type", "schema_version", "field_extraction", "consistency"}
+        missing = sorted(required_keys - set(extraction.keys()))
+        if missing:
+            raise ValueError(f"Invalid extraction payload. Missing keys: {missing}")
+
+        schema_field_names = {str(field["name"]) for field in schema.get("fields", [])}
+        payload_field_names = set(field_rows.keys())
+        unexpected = sorted(payload_field_names - schema_field_names)
+        if unexpected:
+            raise ValueError(f"Extraction has fields not in schema: {unexpected}")
+
+        for field_name, field in field_rows.items():
+            if not 0.0 <= field.confidence <= 1.0:
+                raise ValueError(f"Invalid confidence for field '{field_name}': {field.confidence}")
+            if field.found and not field.evidence:
+                consistency.warnings.append(f"Field '{field_name}' is found but has no evidence anchors")
+
+        if consistency.status not in {"passed", "warning", "failed", "skipped"}:
+            raise ValueError(f"Invalid consistency status: {consistency.status}")
+
     def run(
         self,
         text: str,
@@ -187,14 +153,14 @@ class ExtractFinanceSignalsTool:
             extraction["signals"][key] = sorted(set(m.strip() for m in matches if m.strip()))[:25]
 
         doc_type = self._resolve_doc_type(instruction=instruction, text=text, document_type=document_type)
-        schema = self._schemas[doc_type]
+        _, schema = resolve_schema(doc_type)
         extraction["document_type"] = doc_type
         extraction["schema_version"] = schema["version"]
 
         if not doc_map:
             extraction["structure_pass"] = {"section_families": {}}
             extraction["field_extraction"] = {}
-            extraction["consistency"] = {"status": "skipped", "score": 0.0, "issues": ["No document map provided"]}
+            extraction["consistency"] = {"status": "skipped", "score": 0.0, "issues": ["No document map provided"], "warnings": []}
             return extraction
 
         # Pass 1: discover structure families from section/page index.
@@ -214,7 +180,7 @@ class ExtractFinanceSignalsTool:
         extraction["structure_pass"] = {"section_families": section_families}
 
         # Pass 2: field extraction with definitions and section context.
-        field_rows: dict[str, Any] = {}
+        field_rows: dict[str, ExtractionField] = {}
         for field in schema["fields"]:
             name = field["name"]
             sections = self._find_sections(doc_map=doc_map, hints=field["section_hints"])
@@ -247,46 +213,60 @@ class ExtractFinanceSignalsTool:
             if not value:
                 value = self._extract_best_snippet(blocks=ranked_blocks, hints=field["term_hints"])
 
-            evidence = []
+            evidence: list[ExtractionEvidence] = []
             seen = set()
             for row in ranked_blocks[:3]:
                 anchor = row.get("anchor", "")
                 if anchor and anchor not in seen:
                     seen.add(anchor)
-                    evidence.append({"anchor": anchor, "excerpt": row["text"][:220]})
+                    evidence.append(ExtractionEvidence(anchor=anchor, excerpt=row["text"][:220]))
             top_score = scored[0][0] if scored else 0
 
-            field_rows[name] = {
-                "value": value,
-                "found": bool(value),
-                "confidence": round(min(1.0, top_score / 6), 3),
-                "required": bool(field.get("required")),
-                "evidence": evidence,
-                "reason": (
+            unresolved_dependencies = [] if value else ["missing_indexed_evidence"]
+            field_rows[name] = ExtractionField(
+                value=value,
+                found=bool(value),
+                confidence=round(min(1.0, top_score / 6), 3),
+                required=bool(field.get("required")),
+                evidence=evidence,
+                reason=(
                     "Extracted from section-indexed evidence and definition context."
                     if value
                     else "No matching evidence found in indexed sections/definitions."
                 ),
+                unresolved_dependencies=unresolved_dependencies,
+            )
+        extraction["field_extraction"] = {
+            field_name: {
+                "value": field.value,
+                "found": field.found,
+                "confidence": field.confidence,
+                "required": field.required,
+                "evidence": [{"anchor": item.anchor, "excerpt": item.excerpt} for item in field.evidence],
+                "reason": field.reason,
+                "unresolved_dependencies": field.unresolved_dependencies,
             }
-        extraction["field_extraction"] = field_rows
+            for field_name, field in field_rows.items()
+        }
 
         # Pass 3: consistency checks.
         issues: list[str] = []
         required = [field["name"] for field in schema["fields"] if field.get("required")]
         for key in required:
-            if not field_rows.get(key, {}).get("found"):
+            row = field_rows.get(key)
+            if not row or not row.found:
                 issues.append(f"Missing required field: {key}")
 
-        maturity_date = self._parse_date(field_rows.get("maturity_date", {}).get("value"))
-        reporting_date = self._parse_date(field_rows.get("reporting_period_end", {}).get("value"))
+        maturity_date = self._parse_date(field_rows.get("maturity_date").value if field_rows.get("maturity_date") else None)
+        reporting_date = self._parse_date(field_rows.get("reporting_period_end").value if field_rows.get("reporting_period_end") else None)
         if maturity_date and reporting_date and maturity_date < reporting_date:
             issues.append("maturity_date is earlier than reporting_period_end")
 
-        raw_amount = str(field_rows.get("facility_amount", {}).get("value") or "")
+        raw_amount = str(field_rows.get("facility_amount").value if field_rows.get("facility_amount") else "")
         if raw_amount and "$" not in raw_amount:
             issues.append("facility_amount did not include explicit currency symbol")
 
-        found_count = sum(1 for row in field_rows.values() if row.get("found"))
+        found_count = sum(1 for row in field_rows.values() if row.found)
         coverage = found_count / max(1, len(field_rows))
         if issues:
             status = "warning"
@@ -294,7 +274,20 @@ class ExtractFinanceSignalsTool:
         else:
             status = "passed"
             score = round(coverage, 4)
-        extraction["consistency"] = {"status": status, "score": score, "issues": issues}
+        consistency = ConsistencyResult(status=status, score=score, issues=issues, warnings=[])
+        extraction["consistency"] = {
+            "status": consistency.status,
+            "score": consistency.score,
+            "issues": consistency.issues,
+            "warnings": consistency.warnings,
+        }
+        self._validate_contract(extraction=extraction, schema=schema, field_rows=field_rows, consistency=consistency)
+        extraction["consistency"] = {
+            "status": consistency.status,
+            "score": consistency.score,
+            "issues": consistency.issues,
+            "warnings": consistency.warnings,
+        }
 
         return extraction
 

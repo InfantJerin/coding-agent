@@ -40,3 +40,37 @@ class RunResult:
     message: str
     artifacts: list[RunArtifact]
     trace: list[dict[str, Any]]
+
+
+@dataclass
+class ExtractionEvidence:
+    anchor: str
+    excerpt: str
+
+
+@dataclass
+class ExtractionField:
+    value: str | None
+    found: bool
+    confidence: float
+    required: bool
+    evidence: list[ExtractionEvidence] = field(default_factory=list)
+    reason: str = ""
+    unresolved_dependencies: list[str] = field(default_factory=list)
+
+
+@dataclass
+class ConsistencyResult:
+    status: str
+    score: float
+    issues: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+
+@dataclass
+class SessionState:
+    session_id: str
+    step_history: list[dict[str, Any]] = field(default_factory=list)
+    checkpoints: list[dict[str, Any]] = field(default_factory=list)
+    prompt_context: dict[str, Any] = field(default_factory=dict)
+    memory: dict[str, Any] = field(default_factory=dict)

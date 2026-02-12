@@ -8,5 +8,12 @@
     "What are the financial covenants?",
     "What is the maturity date?"
   ],
-  "output_modes": ["report", "json"]
+  "output_modes": ["report", "json"],
+  "metadata": {
+    "document_type": "credit_agreement",
+    "skill_pack": "finance-docs",
+    "tool_policy_override": {
+      "deny": ["safe_bash"]
+    }
+  }
 }

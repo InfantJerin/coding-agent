@@ -23,6 +23,7 @@ from tools.document_tools import (
     SearchInDocTool,
 )
 from tools.finance_tools import BuildOpsAnswerTool, BuildSummaryReportTool, ExtractFinanceSignalsTool
+from tools.retrieval_tools import BuildChunkIndexTool, ChunkDocMapSectionsTool, ChunkDocumentTool, RetrieveChunksTool
 from tools.state_tools import AppendReadingTrailTool, ReadScratchpadTool, WriteScratchpadTool
 
 
@@ -64,6 +65,10 @@ def build_finance_docs_profile() -> AgentProfile:
         "extract_finance_signals": ExtractFinanceSignalsTool(),
         "build_ops_answer": BuildOpsAnswerTool(llm_client=llm_client, model_label=model_label),
         "build_summary_report": BuildSummaryReportTool(),
+        "chunk_document": ChunkDocumentTool(),
+        "chunk_doc_map_sections": ChunkDocMapSectionsTool(),
+        "build_chunk_index": BuildChunkIndexTool(),
+        "retrieve_chunks": RetrieveChunksTool(),
     }
 
     policy = ToolPolicy(
@@ -85,6 +90,10 @@ def build_finance_docs_profile() -> AgentProfile:
             "extract_finance_signals",
             "build_ops_answer",
             "build_summary_report",
+            "chunk_document",
+            "chunk_doc_map_sections",
+            "build_chunk_index",
+            "retrieve_chunks",
             "safe_bash",
         ],
         deny=[],

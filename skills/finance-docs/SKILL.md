@@ -36,8 +36,11 @@ For extraction requests, use this sequence:
 - Record unresolved references/fields as open questions.
 - Treat `document_type` as configurable:
   - Start with `credit_agreement`.
-  - Reuse same workflow for other finance docs (for example, `compliance_certificate`) via schema changes.
+  - Reuse same workflow for other finance docs (for example, `compliance_certificate`, `rate_notice`) via schema changes.
+- For strict tool control during runs, set `metadata.tool_policy_override` with allow/deny lists.
 
 ## References
 
 - Covenant and term checklist: `references/credit-agreement-fields.md`
+- Compliance checklist: `references/compliance-certificate-fields.md`
+- Rate notice checklist: `references/rate-notice-fields.md`

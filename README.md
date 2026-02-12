@@ -52,6 +52,21 @@ Extraction is schema-driven and multi-pass:
 
 `document_type` can be set in task metadata (for example: `credit_agreement`, `compliance_certificate`).
 
+Task-level policy override is also supported:
+
+```json
+{
+  "metadata": {
+    "tool_policy_override": {
+      "allow": ["load_documents", "build_doc_map", "search_in_doc"],
+      "deny": ["safe_bash"]
+    }
+  }
+}
+```
+
+Run traces now include structured events and checkpoints with a generated `session_id`.
+
 ## LLM Index Fallback
 
 If TOC extraction is unavailable or weak, `build_doc_map` can use the configured LLM to propose a basic section index (`source: "llm"`), then merge it with parsed headings/outlines.
@@ -76,6 +91,7 @@ PYTHONPATH=src python3 src/main.py --mode headless \
 
 - `summary_report.md`
 - `extraction.json`
+- `memory.json`
 - `run_trace.json`
 - `run_result.json`
 

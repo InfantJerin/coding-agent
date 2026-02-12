@@ -22,7 +22,7 @@ py-modules = ["main", "env_loader"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["agent_core*", "profiles*", "tools*", "llm*"]
+include = ["agent_core*", "profiles*", "tools*", "llm*", "schemas*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

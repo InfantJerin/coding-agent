@@ -18,6 +18,15 @@ class ToolPolicyTests(unittest.TestCase):
         with self.assertRaises(PermissionError):
             policy.check("answer_question_from_text")
 
+    def test_merge_task_override_with_deny_precedence(self) -> None:
+        base = ToolPolicy(allow=["*"], deny=["safe_bash"])
+        merged = base.merged(ToolPolicy(allow=["load_documents", "build_doc_map"], deny=["build_doc_map"]))
+        merged.check("load_documents")
+        with self.assertRaises(PermissionError):
+            merged.check("build_doc_map")
+        with self.assertRaises(PermissionError):
+            merged.check("safe_bash")
+
 
 if __name__ == "__main__":
     unittest.main()

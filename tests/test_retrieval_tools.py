@@ -1,6 +1,7 @@
 import unittest
 
-from tools.retrieval_tools import BuildChunkIndexTool, ChunkDocumentTool, RetrieveChunksTool
+from tools.document_tools import BuildDocMapTool, LoadDocumentsTool
+from tools.retrieval_tools import BuildChunkIndexTool, ChunkDocMapSectionsTool, ChunkDocumentTool, RetrieveChunksTool
 
 
 class RetrievalToolsTests(unittest.TestCase):
@@ -17,6 +18,16 @@ class RetrievalToolsTests(unittest.TestCase):
         self.assertTrue(hits)
         merged = " ".join(hit["text"].lower() for hit in hits)
         self.assertIn("maturity", merged)
+
+    def test_section_aware_chunking_from_doc_map(self) -> None:
+        store = LoadDocumentsTool().run(["examples/sample_credit_agreement.txt"])
+        doc_map = BuildDocMapTool().run(store)
+        chunks = ChunkDocMapSectionsTool().run(doc_map=doc_map, max_chars=500)
+        self.assertTrue(chunks)
+        index = BuildChunkIndexTool().run(chunks=chunks)
+        hits = RetrieveChunksTool().run(query="Applicable Margin means", index=index, top_k=3)
+        self.assertTrue(hits)
+        self.assertTrue(any("section_no" in item for item in hits))
 
 
 if __name__ == "__main__":
