@@ -44,6 +44,17 @@ The agent now follows:
 7. Quote evidence and run consistency check
 8. Produce cited answer
 
+## LLM Index Fallback
+
+If TOC extraction is unavailable or weak, `build_doc_map` can use the configured LLM to propose a basic section index (`source: "llm"`), then merge it with parsed headings/outlines.
+
+Section nodes now also include:
+
+- `summary`
+- `key_events`
+
+This is used for tree-guided navigation and query matching.
+
 ## Run (Headless Mode)
 
 ```bash

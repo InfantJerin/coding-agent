@@ -47,7 +47,7 @@ def build_finance_docs_profile() -> AgentProfile:
 
     tools = {
         "load_documents": LoadDocumentsTool(),
-        "build_doc_map": BuildDocMapTool(),
+        "build_doc_map": BuildDocMapTool(llm_client=llm_client),
         "open_doc": OpenDocTool(),
         "goto_page": GotoPageTool(),
         "open_at_anchor": OpenAtAnchorTool(),

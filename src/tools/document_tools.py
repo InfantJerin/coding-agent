@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
@@ -7,6 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from llm.providers import LLMClient
 
 SECTION_RE = re.compile(r"^(?:Section|SECTION)\s+(\d+(?:\.\d+)*)\s*[:.-]?\s*(.*)$")
 NUMERIC_HEADING_RE = re.compile(r"^(\d+(?:\.\d+){1,5})\s+([A-Za-z][A-Za-z0-9 ,:;()'\"/&-]{2,})$")
@@ -252,6 +254,8 @@ def _build_section_tree(sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "end_index": int(section.get("page_end", section.get("page_start", 1))),
             "anchor": section["anchor"],
             "source": section.get("source", "text"),
+            "summary": section.get("summary", ""),
+            "key_events": section.get("key_events", []),
             "children": [],
         }
 
@@ -305,6 +309,66 @@ def _flatten_tree(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+def _extract_json_array(text: str) -> list[dict[str, Any]]:
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            return [item for item in data if isinstance(item, dict)]
+    except Exception:
+        pass
+
+    match = re.search(r"\[\s*\{.*\}\s*\]", text, re.DOTALL)
+    if not match:
+        return []
+    try:
+        data = json.loads(match.group(0))
+        if isinstance(data, list):
+            return [item for item in data if isinstance(item, dict)]
+    except Exception:
+        return []
+    return []
+
+
+def _build_section_summary(doc: dict[str, Any], section: dict[str, Any]) -> tuple[str, list[str]]:
+    start = max(1, int(section.get("page_start", 1)))
+    end = min(int(doc["total_pages"]), int(section.get("page_end", start)))
+
+    lines: list[str] = []
+    for page in range(start, end + 1):
+        page_text = doc["pages"][page - 1]
+        for raw in page_text.splitlines():
+            line = raw.strip()
+            if not line:
+                continue
+            if _detect_heading(line):
+                continue
+            lines.append(line)
+
+    if not lines:
+        return "", []
+
+    summary = " ".join(lines)[:320]
+    key_events: list[str] = []
+    event_tokens = (
+        "covenant",
+        "default",
+        "maturity",
+        "interest",
+        "payment",
+        "ratio",
+        "margin",
+        "liquidity",
+        "leverage",
+    )
+    for line in lines:
+        low = line.lower()
+        if any(token in low for token in event_tokens):
+            key_events.append(line[:220])
+        if len(key_events) >= 5:
+            break
+    return summary, key_events
+
+
 class LoadDocumentsTool:
     name = "load_documents"
 
@@ -337,6 +401,70 @@ class LoadDocumentsTool:
 
 class BuildDocMapTool:
     name = "build_doc_map"
+
+    def __init__(self, llm_client: LLMClient | None = None) -> None:
+        self.llm_client = llm_client
+
+    def _build_llm_sections(self, doc: dict[str, Any]) -> list[dict[str, Any]]:
+        if self.llm_client is None:
+            return []
+
+        previews: list[str] = []
+        for page_num, text in enumerate(doc["pages"][: min(12, len(doc["pages"]))], start=1):
+            clean = " ".join(text.split())
+            if not clean:
+                continue
+            previews.append(f"[PAGE {page_num}] {clean[:1200]}")
+
+        if not previews:
+            return []
+
+        system_prompt = (
+            "Extract a basic legal-document table of contents from page previews. "
+            "Return JSON array only. Each item must include: "
+            "section_no, title, page_start, level."
+        )
+        user_prompt = (
+            "Document previews:\n"
+            + "\n\n".join(previews)
+            + "\n\nReturn strictly JSON array, no markdown."
+        )
+
+        try:
+            raw = self.llm_client.generate(system_prompt=system_prompt, user_prompt=user_prompt)
+        except Exception:
+            return []
+
+        rows = _extract_json_array(raw)
+        out: list[dict[str, Any]] = []
+        for idx, row in enumerate(rows, start=1):
+            section_no = str(row.get("section_no", "")).strip() or f"LLM-{idx}"
+            title = str(row.get("title", "")).strip() or f"Section {section_no}"
+            try:
+                page_start = int(row.get("page_start", 1))
+            except Exception:
+                page_start = 1
+            if page_start < 1:
+                page_start = 1
+            try:
+                level = int(row.get("level", 1))
+            except Exception:
+                level = 1
+            out.append(
+                {
+                    "id": f"{doc['doc_id']}:section:{section_no}:llm:{idx}",
+                    "doc_id": doc["doc_id"],
+                    "section_no": section_no,
+                    "title": title,
+                    "level": max(1, level),
+                    "page_start": min(page_start, int(doc["total_pages"])),
+                    "page_end": min(page_start, int(doc["total_pages"])),
+                    "anchor": "",
+                    "block_start": 1,
+                    "source": "llm",
+                }
+            )
+        return out
 
     def run(self, document_store: dict[str, Any]) -> dict[str, Any]:
         sections: list[dict[str, Any]] = []
@@ -372,6 +500,10 @@ class BuildDocMapTool:
                         "source": "toc",
                     }
                 )
+
+            # If TOC isn't detectable, ask LLM for a basic index proposal.
+            if not toc_candidates:
+                sections.extend(self._build_llm_sections(doc))
 
             for page_num, page_text in enumerate(doc["pages"], start=1):
                 raw_blocks = [line.strip() for line in page_text.splitlines() if line.strip()]
@@ -461,7 +593,7 @@ class BuildDocMapTool:
             sections = [s for s in sections if s["doc_id"] != doc_id] + corrected
 
         # choose best representative per normalized section key
-        source_priority = {"toc": 0, "outline": 1, "text": 2}
+        source_priority = {"toc": 0, "outline": 1, "llm": 2, "text": 3}
         picked_sections: dict[tuple[str, str], dict[str, Any]] = {}
         for section in sections:
             key = (section["doc_id"], _normalize_section_key(section["section_no"]))
@@ -523,6 +655,16 @@ class BuildDocMapTool:
                 section["page_end"] = max(int(section["page_start"]), int(next_section["page_start"]) - 1)
             else:
                 section["page_end"] = max_page_by_doc.get(doc_id, int(section["page_start"]))
+
+        # Add section-level summaries/key events for index navigation.
+        docs_by_id = {d["doc_id"]: d for d in document_store["documents"]}
+        for section in sections:
+            doc = docs_by_id.get(section["doc_id"])
+            if not doc:
+                continue
+            summary, key_events = _build_section_summary(doc, section)
+            section["summary"] = summary
+            section["key_events"] = key_events
 
         sections_by_doc: dict[str, list[dict[str, Any]]] = {}
         for section in sections:
@@ -638,6 +780,10 @@ class SearchInDocTool:
                     anchor = node.get("anchor")
                     anchor_data = doc_map["anchors"].get(anchor, {}) if anchor else {}
                     text = f"{node.get('section_no','')} {node.get('title','')} {anchor_data.get('text','')}"
+                    if node.get("summary"):
+                        text = f"{text} {node['summary']}"
+                    if node.get("key_events"):
+                        text = f"{text} {' '.join(node['key_events'])}"
                     score = score_text(text)
                     if score > 0:
                         candidates.append(
