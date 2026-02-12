@@ -7,10 +7,18 @@ class DocumentMapToolsTests(unittest.TestCase):
     def test_build_map_has_sections_and_defs(self) -> None:
         store = LoadDocumentsTool().run(["examples/sample_credit_agreement.txt"])
         doc_map = BuildDocMapTool().run(store)
+        doc_id = doc_map["document_store"]["documents"][0]["doc_id"]
 
         self.assertGreaterEqual(len(doc_map["sections"]), 3)
         self.assertGreaterEqual(len(doc_map["definitions"]), 2)
         self.assertGreaterEqual(len(doc_map["xrefs"]), 1)
+        self.assertIn(doc_id, doc_map["section_tree"])
+        self.assertTrue(doc_map["section_tree"][doc_id])
+        first = doc_map["section_tree"][doc_id][0]
+        self.assertIn("node_id", first)
+        self.assertTrue(first["node_id"].startswith("N"))
+        self.assertIn("start_index", first)
+        self.assertIn("end_index", first)
 
     def test_read_definition_and_follow_ref(self) -> None:
         store = LoadDocumentsTool().run(["examples/sample_credit_agreement.txt"])
