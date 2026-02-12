@@ -7,7 +7,7 @@ name = "generic-finance-agent"
 version = "0.1.0"
 description = "Generic headless agent with pluggable finance tools"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["PyYAML>=6.0.1"]
 
 [project.optional-dependencies]
 pdf = ["pypdf>=5.0.0"]
@@ -23,6 +23,10 @@ py-modules = ["main", "env_loader"]
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["agent_core*", "profiles*", "tools*", "llm*", "schemas*"]
+
+[tool.setuptools.package-data]
+agent_core = ["*.yaml"]
+schemas = ["finance/*.yaml"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

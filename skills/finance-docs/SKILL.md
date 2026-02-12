@@ -37,6 +37,12 @@ For extraction requests, use this sequence:
 - Treat `document_type` as configurable:
   - Start with `credit_agreement`.
   - Reuse same workflow for other finance docs (for example, `compliance_certificate`, `rate_notice`) via schema changes.
+- Load schema from YAML:
+  - Built-in YAML by `document_type`.
+  - Override with `metadata.schema_path` when user/developer provides a custom schema file.
+- Use strategy-driven execution:
+  - Parse and step sequence come from strategy YAML.
+  - Override with `metadata.strategy_path` or `metadata.strategy_override`.
 - For strict tool control during runs, set `metadata.tool_policy_override` with allow/deny lists.
 
 ## References

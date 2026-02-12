@@ -466,7 +466,7 @@ class BuildDocMapTool:
             )
         return out
 
-    def run(self, document_store: dict[str, Any]) -> dict[str, Any]:
+    def run(self, document_store: dict[str, Any], parse_strategy: str = "legal_contract") -> dict[str, Any]:
         sections: list[dict[str, Any]] = []
         definitions: list[dict[str, Any]] = []
         anchors: dict[str, dict[str, Any]] = {}
@@ -481,6 +481,37 @@ class BuildDocMapTool:
 
         for doc in document_store["documents"]:
             doc_id = doc["doc_id"]
+            if parse_strategy != "legal_contract":
+                for page_num, page_text in enumerate(doc["pages"], start=1):
+                    raw_blocks = [line.strip() for line in page_text.splitlines() if line.strip()]
+                    if not raw_blocks:
+                        raw_blocks = [f"Page {page_num}"]
+                    for block_num, block in enumerate(raw_blocks, start=1):
+                        anchor = f"{doc_id}:p{page_num}:b{block_num}"
+                        page_first_anchor.setdefault((doc_id, page_num), anchor)
+                        anchors[anchor] = {
+                            "doc_id": doc_id,
+                            "page": page_num,
+                            "block": block_num,
+                            "text": block,
+                        }
+                    first_anchor = page_first_anchor[(doc_id, page_num)]
+                    title = raw_blocks[0][:100].strip() or f"Page {page_num}"
+                    sections.append(
+                        {
+                            "id": f"{doc_id}:section:P{page_num}:generic",
+                            "doc_id": doc_id,
+                            "section_no": f"P{page_num}",
+                            "title": title,
+                            "level": 1,
+                            "page_start": page_num,
+                            "page_end": page_num,
+                            "anchor": first_anchor,
+                            "block_start": 1,
+                            "source": "generic",
+                        }
+                    )
+                continue
 
             # TOC-first candidates
             toc_candidates = _extract_toc_candidates(doc)
@@ -593,7 +624,7 @@ class BuildDocMapTool:
             sections = [s for s in sections if s["doc_id"] != doc_id] + corrected
 
         # choose best representative per normalized section key
-        source_priority = {"toc": 0, "outline": 1, "llm": 2, "text": 3}
+        source_priority = {"toc": 0, "outline": 1, "llm": 2, "generic": 2, "text": 3}
         picked_sections: dict[tuple[str, str], dict[str, Any]] = {}
         for section in sections:
             key = (section["doc_id"], _normalize_section_key(section["section_no"]))

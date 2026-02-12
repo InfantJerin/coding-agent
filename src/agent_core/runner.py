@@ -10,6 +10,7 @@ from typing import Any
 
 from agent_core.memory import MemoryStore
 from agent_core.models import RunArtifact, RunResult, SessionState, TaskRequest
+from agent_core.strategy import RunStrategy, resolve_run_strategy
 from agent_core.tooling import ToolPolicy, ToolRegistry
 
 
@@ -75,11 +76,17 @@ class GenericHeadlessAgent:
         doc_map: dict[str, Any],
         metadata: dict[str, Any],
         policy: ToolPolicy,
+        strategy: RunStrategy,
     ) -> dict[str, Any]:
         return {
             "instruction": instruction,
             "document_type": metadata.get("document_type") or "credit_agreement",
             "skill_pack": metadata.get("skill_pack") or "finance-docs",
+            "strategy": {
+                "name": strategy.name,
+                "parse_strategy": strategy.parse_strategy,
+                "run_steps": strategy.run_steps,
+            },
             "tooling": {
                 "allow": policy.allow or ["*"],
                 "deny": policy.deny or [],
@@ -147,6 +154,7 @@ class GenericHeadlessAgent:
         session: SessionState,
         policy: ToolPolicy,
         documents: list[Path],
+        parse_strategy: str,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         state: dict[str, Any] = {
             "scratchpad": {},
@@ -166,6 +174,7 @@ class GenericHeadlessAgent:
             policy,
             "build_doc_map",
             document_store=document_store,
+            parse_strategy=parse_strategy,
         )
         return state, doc_map
 
@@ -290,61 +299,94 @@ class GenericHeadlessAgent:
         session = SessionState(session_id=f"s-{uuid.uuid4().hex[:10]}")
         run_policy = self._resolve_policy(task.metadata)
         memory_store = MemoryStore()
+        document_type = str(task.metadata.get("document_type", "")).strip() or "credit_agreement"
+        strategy = resolve_run_strategy(document_type=document_type, metadata=task.metadata)
 
         self._emit_event(trace, session, "run_started", {"documents": [str(item) for item in task.documents]})
-        state, doc_map = self._bootstrap(trace=trace, session=session, policy=run_policy, documents=task.documents)
-        self._checkpoint(trace, session, step="bootstrap", run_state=state)
+        state, doc_map = self._bootstrap(
+            trace=trace,
+            session=session,
+            policy=run_policy,
+            documents=task.documents,
+            parse_strategy=strategy.parse_strategy,
+        )
+        if "bootstrap" in strategy.run_steps:
+            self._checkpoint(trace, session, step="bootstrap", run_state=state)
         session.prompt_context = self._build_prompt_context(
             instruction=task.instruction,
             doc_map=doc_map,
             metadata=task.metadata,
             policy=run_policy,
+            strategy=strategy,
         )
 
-        combined_text = "\n\n".join(
-            page
-            for doc in doc_map["document_store"]["documents"]
-            for page in doc.get("pages", [])
-        )
-        extraction = self._call_tool(
-            trace,
-            session,
-            run_policy,
-            "extract_finance_signals",
-            text=combined_text,
-            instruction=task.instruction,
-            doc_map=doc_map,
-            document_type=str(task.metadata.get("document_type", "") or "").strip() or None,
-        )
-        self._validate_extraction(extraction)
-        memory_store.add(kind="extraction", content={"document_type": extraction.get("document_type"), "field_extraction": extraction.get("field_extraction", {})})
-        self._checkpoint(trace, session, step="extraction", run_state=state)
+        extraction: dict[str, Any] = {"instruction": task.instruction, "signals": {}, "field_extraction": {}, "consistency": {"status": "skipped", "score": 0.0}}
+        answers: list[dict[str, Any]] = []
+        report_md = ""
 
-        answers = [
-            self._ops_answer_question(
-                trace=trace,
-                session=session,
-                policy=run_policy,
-                state=state,
-                doc_map=doc_map,
-                memory=memory_store,
-                question=question,
+        combined_text = "\n\n".join(page for doc in doc_map["document_store"]["documents"] for page in doc.get("pages", []))
+        for step in strategy.run_steps:
+            if step == "bootstrap":
+                continue
+            if step == "extract":
+                extraction = self._call_tool(
+                    trace,
+                    session,
+                    run_policy,
+                    "extract_finance_signals",
+                    text=combined_text,
+                    instruction=task.instruction,
+                    doc_map=doc_map,
+                    document_type=document_type,
+                    schema_path=str(task.metadata.get("schema_path", "")).strip() or None,
+                )
+                self._validate_extraction(extraction)
+                memory_store.add(
+                    kind="extraction",
+                    content={"document_type": extraction.get("document_type"), "field_extraction": extraction.get("field_extraction", {})},
+                )
+                self._checkpoint(trace, session, step="extraction", run_state=state)
+                continue
+            if step == "qa":
+                answers = [
+                    self._ops_answer_question(
+                        trace=trace,
+                        session=session,
+                        policy=run_policy,
+                        state=state,
+                        doc_map=doc_map,
+                        memory=memory_store,
+                        question=question,
+                    )
+                    for question in task.questions
+                ]
+                for item in answers:
+                    memory_store.add(kind="qa", content={"question": item.get("question"), "answer": item.get("answer"), "anchors": item.get("anchors", [])})
+                self._checkpoint(trace, session, step="qa", run_state=state)
+                continue
+            if step == "report":
+                report_md = self._call_tool(
+                    trace,
+                    session,
+                    run_policy,
+                    "build_summary_report",
+                    instruction=task.instruction,
+                    extraction=extraction,
+                    qa=[{"question": item["question"], "answer": item["answer"]} for item in answers],
+                )
+                continue
+            self._emit_event(trace, session, "step_skipped", {"reason": "unknown_step", "step": step})
+
+        if not report_md:
+            report_md = self._call_tool(
+                trace,
+                session,
+                run_policy,
+                "build_summary_report",
+                instruction=task.instruction,
+                extraction=extraction,
+                qa=[{"question": item["question"], "answer": item["answer"]} for item in answers],
             )
-            for question in task.questions
-        ]
-        for item in answers:
-            memory_store.add(kind="qa", content={"question": item.get("question"), "answer": item.get("answer"), "anchors": item.get("anchors", [])})
-        self._checkpoint(trace, session, step="qa", run_state=state)
-
-        report_md = self._call_tool(
-            trace,
-            session,
-            run_policy,
-            "build_summary_report",
-            instruction=task.instruction,
-            extraction=extraction,
-            qa=[{"question": item["question"], "answer": item["answer"]} for item in answers],
-        )
 
         artifacts: list[RunArtifact] = []
 
@@ -363,6 +405,7 @@ class GenericHeadlessAgent:
                 "warnings": extraction.get("consistency", {}).get("warnings", []),
                 "session": asdict(session),
                 "memory_hits": memory_store.query(" ".join(task.questions), top_k=10),
+                "strategy": {"name": strategy.name, "parse_strategy": strategy.parse_strategy, "run_steps": strategy.run_steps},
                 "doc_map_summary": {
                     "sections": len(doc_map.get("sections", [])),
                     "definitions": len(doc_map.get("definitions", [])),
@@ -383,8 +426,8 @@ class GenericHeadlessAgent:
         run_info["task"]["documents"] = [str(p) for p in task.documents]
         run_info_path.write_text(json.dumps(run_info, indent=2))
         artifacts.append(RunArtifact(name="run_result", path=run_info_path))
-        memory_store.save(output_dir / "memory.json")
-        artifacts.append(RunArtifact(name="memory", path=output_dir / "memory.json"))
+        memory_store.save(output_dir / "memory.jsonl")
+        artifacts.append(RunArtifact(name="memory", path=output_dir / "memory.jsonl"))
         self._emit_event(trace, session, "run_finished", {"success": True})
         trace_path = output_dir / "run_trace.json"
         trace_path.write_text(json.dumps(trace, indent=2))
@@ -403,42 +446,60 @@ class GenericHeadlessAgent:
         session = SessionState(session_id=f"s-{uuid.uuid4().hex[:10]}")
         run_policy = self._resolve_policy(metadata)
         memory_store = MemoryStore()
+        metadata = metadata or {}
+        document_type = str(metadata.get("document_type", "")).strip() or "credit_agreement"
+        strategy = resolve_run_strategy(document_type=document_type, metadata=metadata)
         self._emit_event(trace, session, "respond_started", {"query": query})
-        state, doc_map = self._bootstrap(trace=trace, session=session, policy=run_policy, documents=documents)
-        session.prompt_context = self._build_prompt_context(
-            instruction=instruction,
-            doc_map=doc_map,
-            metadata=metadata or {},
-            policy=run_policy,
-        )
-
-        combined_text = "\n\n".join(
-            page
-            for doc in doc_map["document_store"]["documents"]
-            for page in doc.get("pages", [])
-        )
-        extraction = self._call_tool(
-            trace,
-            session,
-            run_policy,
-            "extract_finance_signals",
-            text=combined_text,
-            instruction=instruction,
-            doc_map=doc_map,
-            document_type=str((metadata or {}).get("document_type", "")).strip() or None,
-        )
-        self._validate_extraction(extraction)
-        memory_store.add(kind="extraction", content={"document_type": extraction.get("document_type"), "field_extraction": extraction.get("field_extraction", {})})
-
-        result = self._ops_answer_question(
+        state, doc_map = self._bootstrap(
             trace=trace,
             session=session,
             policy=run_policy,
-            state=state,
-            doc_map=doc_map,
-            memory=memory_store,
-            question=query,
+            documents=documents,
+            parse_strategy=strategy.parse_strategy,
         )
+        session.prompt_context = self._build_prompt_context(
+            instruction=instruction,
+            doc_map=doc_map,
+            metadata=metadata,
+            policy=run_policy,
+            strategy=strategy,
+        )
+
+        combined_text = "\n\n".join(page for doc in doc_map["document_store"]["documents"] for page in doc.get("pages", []))
+        extraction: dict[str, Any] = {"instruction": instruction, "signals": {}, "field_extraction": {}, "consistency": {"status": "skipped", "score": 0.0}}
+        result: dict[str, Any] = {"answer": "No answer step configured.", "consistency": {"status": "skipped", "score": 0.0}}
+        for step in strategy.run_steps:
+            if step == "bootstrap":
+                continue
+            if step == "extract":
+                extraction = self._call_tool(
+                    trace,
+                    session,
+                    run_policy,
+                    "extract_finance_signals",
+                    text=combined_text,
+                    instruction=instruction,
+                    doc_map=doc_map,
+                    document_type=document_type,
+                    schema_path=str(metadata.get("schema_path", "")).strip() or None,
+                )
+                self._validate_extraction(extraction)
+                memory_store.add(
+                    kind="extraction",
+                    content={"document_type": extraction.get("document_type"), "field_extraction": extraction.get("field_extraction", {})},
+                )
+                continue
+            if step == "qa":
+                result = self._ops_answer_question(
+                    trace=trace,
+                    session=session,
+                    policy=run_policy,
+                    state=state,
+                    doc_map=doc_map,
+                    memory=memory_store,
+                    question=query,
+                )
+                continue
 
         lines: list[str] = []
         lines.append("## Answer")
@@ -474,6 +535,7 @@ class GenericHeadlessAgent:
         lines.append("## Session")
         lines.append(f"- session_id: {session.session_id}")
         lines.append(f"- checkpoints: {len(session.checkpoints)}")
+        lines.append(f"- strategy: {strategy.name} ({strategy.parse_strategy})")
 
         self._emit_event(trace, session, "respond_finished", {"success": True})
         return "\n".join(lines), trace

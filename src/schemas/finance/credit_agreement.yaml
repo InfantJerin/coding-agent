@@ -1,0 +1,33 @@
+document_type: credit_agreement
+schema:
+  version: v1
+  fields:
+    - name: facility_amount
+      required: true
+      section_hints: ["commitments", "the commitments", "facility", "loans", "amount"]
+      term_hints: ["facility", "commitment", "loan", "amount"]
+      pattern: "\\$\\s?\\d[\\d,]*(?:\\.\\d+)?\\s?(?:million|billion|m)?"
+    - name: maturity_date
+      required: true
+      section_hints: ["maturity", "termination", "term", "repayment"]
+      term_hints: ["maturity", "termination", "repayment"]
+      pattern: "(?:maturity date is|maturity date|terminates? on|termination date is)\\s+([A-Za-z]+\\s+\\d{1,2},\\s+\\d{4}|\\d{4}-\\d{2}-\\d{2})"
+    - name: interest_benchmark
+      required: false
+      section_hints: ["interest", "benchmark", "rate", "applicable margin", "pricing"]
+      term_hints: ["sofr", "libor", "base rate", "prime rate", "interest rate"]
+      pattern: "(SOFR|LIBOR|Base Rate|Prime Rate)"
+    - name: conditions_precedent
+      required: false
+      section_hints: ["conditions precedent", "conditions to borrowing", "borrowing", "advances"]
+      term_hints: ["condition precedent", "conditions", "borrowing", "request", "notice"]
+    - name: excess_cash_flow_definition
+      required: false
+      section_hints: ["definitions", "defined terms"]
+      term_hints: ["excess cash flow", "means"]
+  validations:
+    - rule: contains
+      field: facility_amount
+      value: "$"
+      when_found: true
+

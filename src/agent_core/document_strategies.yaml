@@ -1,0 +1,15 @@
+default:
+  parse_strategy: legal_contract
+  run_steps: ["bootstrap", "extract", "qa", "report"]
+
+document_types:
+  credit_agreement:
+    parse_strategy: legal_contract
+    run_steps: ["bootstrap", "extract", "qa", "report"]
+  compliance_certificate:
+    parse_strategy: generic
+    run_steps: ["bootstrap", "extract", "qa", "report"]
+  rate_notice:
+    parse_strategy: generic
+    run_steps: ["bootstrap", "extract", "qa", "report"]
+

@@ -27,15 +27,29 @@ class MemoryStore:
         return [item[1] for item in scored[:top_k]]
 
     def save(self, path: Path) -> None:
-        path.write_text(json.dumps({"entries": self.entries}, indent=2))
+        lines = [json.dumps(row, ensure_ascii=True) for row in self.entries]
+        payload = "\n".join(lines)
+        if payload:
+            payload += "\n"
+        path.write_text(payload)
 
     @classmethod
     def load(cls, path: Path) -> "MemoryStore":
         if not path.exists():
             return cls()
-        payload = json.loads(path.read_text())
-        entries = payload.get("entries", [])
-        if not isinstance(entries, list):
+        text = path.read_text().strip()
+        if not text:
             return cls()
-        return cls(entries=[row for row in entries if isinstance(row, dict)])
 
+        entries: list[dict[str, Any]] = []
+        for line in text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(row, dict):
+                entries.append(row)
+        return cls(entries=entries)

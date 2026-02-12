@@ -23,7 +23,9 @@ class ExtractFinanceSignalsTool:
         "maturity": re.compile(r"maturity date|termination date|expires? on", re.IGNORECASE),
     }
 
-    def _resolve_doc_type(self, instruction: str, text: str, document_type: str | None) -> str:
+    def _resolve_doc_type(self, instruction: str, text: str, document_type: str | None, schema_path: str | None = None) -> str:
+        if schema_path and document_type:
+            return document_type
         known_types = list_document_types()
         if document_type and document_type in known_types:
             return document_type
@@ -143,6 +145,7 @@ class ExtractFinanceSignalsTool:
         instruction: str,
         doc_map: dict[str, Any] | None = None,
         document_type: str | None = None,
+        schema_path: str | None = None,
     ) -> dict[str, Any]:
         extraction: dict[str, Any] = {
             "instruction": instruction,
@@ -152,9 +155,9 @@ class ExtractFinanceSignalsTool:
             matches = pattern.findall(text)
             extraction["signals"][key] = sorted(set(m.strip() for m in matches if m.strip()))[:25]
 
-        doc_type = self._resolve_doc_type(instruction=instruction, text=text, document_type=document_type)
-        _, schema = resolve_schema(doc_type)
-        extraction["document_type"] = doc_type
+        doc_type = self._resolve_doc_type(instruction=instruction, text=text, document_type=document_type, schema_path=schema_path)
+        resolved_doc_type, schema = resolve_schema(document_type=doc_type, schema_path=schema_path)
+        extraction["document_type"] = resolved_doc_type
         extraction["schema_version"] = schema["version"]
 
         if not doc_map:
@@ -251,20 +254,35 @@ class ExtractFinanceSignalsTool:
 
         # Pass 3: consistency checks.
         issues: list[str] = []
+        warnings: list[str] = []
         required = [field["name"] for field in schema["fields"] if field.get("required")]
         for key in required:
             row = field_rows.get(key)
             if not row or not row.found:
                 issues.append(f"Missing required field: {key}")
 
-        maturity_date = self._parse_date(field_rows.get("maturity_date").value if field_rows.get("maturity_date") else None)
-        reporting_date = self._parse_date(field_rows.get("reporting_period_end").value if field_rows.get("reporting_period_end") else None)
-        if maturity_date and reporting_date and maturity_date < reporting_date:
-            issues.append("maturity_date is earlier than reporting_period_end")
-
-        raw_amount = str(field_rows.get("facility_amount").value if field_rows.get("facility_amount") else "")
-        if raw_amount and "$" not in raw_amount:
-            issues.append("facility_amount did not include explicit currency symbol")
+        for rule in schema.get("validations", []) if isinstance(schema.get("validations", []), list) else []:
+            if not isinstance(rule, dict):
+                continue
+            rule_type = str(rule.get("rule", "")).strip().lower()
+            if rule_type == "contains":
+                field_name = str(rule.get("field", "")).strip()
+                expected = str(rule.get("value", ""))
+                when_found = bool(rule.get("when_found", True))
+                row = field_rows.get(field_name)
+                if not row:
+                    continue
+                if when_found and row.found and expected and expected not in str(row.value or ""):
+                    issues.append(f"{field_name} must contain '{expected}'")
+            elif rule_type == "date_order":
+                earlier = str(rule.get("earlier", "")).strip()
+                later = str(rule.get("later", "")).strip()
+                d1 = self._parse_date(field_rows.get(earlier).value if field_rows.get(earlier) else None)
+                d2 = self._parse_date(field_rows.get(later).value if field_rows.get(later) else None)
+                if d1 and d2 and d1 > d2:
+                    issues.append(f"Date order invalid: {earlier} occurs after {later}")
+            else:
+                warnings.append(f"Unknown validation rule ignored: {rule_type}")
 
         found_count = sum(1 for row in field_rows.values() if row.found)
         coverage = found_count / max(1, len(field_rows))
@@ -274,7 +292,7 @@ class ExtractFinanceSignalsTool:
         else:
             status = "passed"
             score = round(coverage, 4)
-        consistency = ConsistencyResult(status=status, score=score, issues=issues, warnings=[])
+        consistency = ConsistencyResult(status=status, score=score, issues=issues, warnings=warnings)
         extraction["consistency"] = {
             "status": consistency.status,
             "score": consistency.score,
@@ -282,12 +300,6 @@ class ExtractFinanceSignalsTool:
             "warnings": consistency.warnings,
         }
         self._validate_contract(extraction=extraction, schema=schema, field_rows=field_rows, consistency=consistency)
-        extraction["consistency"] = {
-            "status": consistency.status,
-            "score": consistency.score,
-            "issues": consistency.issues,
-            "warnings": consistency.warnings,
-        }
 
         return extraction
 

@@ -1,0 +1,20 @@
+document_type: rate_notice
+schema:
+  version: v1
+  fields:
+    - name: effective_date
+      required: true
+      section_hints: ["rate notice", "effective", "interest period"]
+      term_hints: ["effective", "interest period", "date"]
+      pattern: "(?:effective|as of)\\s+([A-Za-z]+\\s+\\d{1,2},\\s+\\d{4}|\\d{4}-\\d{2}-\\d{2})"
+    - name: benchmark_rate
+      required: true
+      section_hints: ["benchmark", "reference rate", "interest"]
+      term_hints: ["sofr", "libor", "base rate", "prime"]
+      pattern: "(SOFR|LIBOR|Base Rate|Prime Rate)"
+    - name: margin
+      required: false
+      section_hints: ["applicable margin", "spread", "pricing"]
+      term_hints: ["margin", "spread", "bps"]
+      pattern: "(\\d+(?:\\.\\d+)?\\s?(?:%|bps))"
+

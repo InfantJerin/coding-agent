@@ -51,12 +51,21 @@ Extraction is schema-driven and multi-pass:
 3. Validation pass: run consistency checks and report issues.
 
 `document_type` can be set in task metadata (for example: `credit_agreement`, `compliance_certificate`).
+Schemas are YAML-driven and can be overridden with `metadata.schema_path`.
+Run orchestration is strategy-driven (YAML), and can be overridden with `metadata.strategy_path` or `metadata.strategy_override`.
 
 Task-level policy override is also supported:
 
 ```json
 {
   "metadata": {
+    "document_type": "credit_agreement",
+    "schema_path": "/absolute/path/to/custom_schema.yaml",
+    "strategy_path": "/absolute/path/to/document_strategies.yaml",
+    "strategy_override": {
+      "parse_strategy": "legal_contract",
+      "run_steps": ["bootstrap", "extract", "qa", "report"]
+    },
     "tool_policy_override": {
       "allow": ["load_documents", "build_doc_map", "search_in_doc"],
       "deny": ["safe_bash"]
@@ -91,7 +100,7 @@ PYTHONPATH=src python3 src/main.py --mode headless \
 
 - `summary_report.md`
 - `extraction.json`
-- `memory.json`
+- `memory.jsonl`
 - `run_trace.json`
 - `run_result.json`
 

@@ -11,7 +11,10 @@
   "output_modes": ["report", "json"],
   "metadata": {
     "document_type": "credit_agreement",
+    "schema_path": "",
+    "strategy_path": "",
     "skill_pack": "finance-docs",
+    "strategy_override": {},
     "tool_policy_override": {
       "deny": ["safe_bash"]
     }

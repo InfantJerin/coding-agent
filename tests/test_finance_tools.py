@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from tools.document_tools import BuildDocMapTool, LoadDocumentsTool
 from tools.finance_tools import ExtractFinanceSignalsTool
@@ -42,6 +44,42 @@ class FinanceToolsTests(unittest.TestCase):
             document_type="compliance_certificate",
         )
         self.assertEqual(output["consistency"]["status"], "skipped")
+
+    def test_custom_yaml_schema_path(self) -> None:
+        with TemporaryDirectory() as tmp:
+            schema_path = Path(tmp) / "custom_notice.yaml"
+            schema_path.write_text(
+                "\n".join(
+                    [
+                        "document_type: custom_notice",
+                        "schema:",
+                        "  version: v1",
+                        "  fields:",
+                        "    - name: notice_id",
+                        "      required: true",
+                        "      section_hints: [\"notice\"]",
+                        "      term_hints: [\"notice id\", \"notice\"]",
+                        "      pattern: \"Notice ID:\\\\s*([A-Z0-9-]+)\"",
+                    ]
+                )
+            )
+            text_path = Path(tmp) / "notice.txt"
+            text_path.write_text("Notice\nNotice ID: ABC-123")
+
+            store = LoadDocumentsTool().run([str(text_path)])
+            doc_map = BuildDocMapTool().run(document_store=store, parse_strategy="generic")
+            text = "\n".join(doc_map["document_store"]["documents"][0]["pages"])
+
+            output = ExtractFinanceSignalsTool().run(
+                text=text,
+                instruction="Extract custom notice fields.",
+                doc_map=doc_map,
+                document_type="custom_notice",
+                schema_path=str(schema_path),
+            )
+            self.assertEqual(output["document_type"], "custom_notice")
+            self.assertIn("notice_id", output["field_extraction"])
+            self.assertTrue(output["field_extraction"]["notice_id"]["found"])
 
 
 if __name__ == "__main__":

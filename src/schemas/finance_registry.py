@@ -1,108 +1,60 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
+import yaml
 
-SCHEMAS: dict[str, dict[str, Any]] = {
-    "credit_agreement": {
-        "version": "v1",
-        "fields": [
-            {
-                "name": "facility_amount",
-                "required": True,
-                "section_hints": ["commitments", "the commitments", "facility", "loans", "amount"],
-                "term_hints": ["facility", "commitment", "loan", "amount"],
-                "pattern": r"\$\s?\d[\d,]*(?:\.\d+)?\s?(?:million|billion|m)?",
-            },
-            {
-                "name": "maturity_date",
-                "required": True,
-                "section_hints": ["maturity", "termination", "term", "repayment"],
-                "term_hints": ["maturity", "termination", "repayment"],
-                "pattern": r"(?:maturity date is|maturity date|terminates? on|termination date is)\s+([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})",
-            },
-            {
-                "name": "interest_benchmark",
-                "required": False,
-                "section_hints": ["interest", "benchmark", "rate", "applicable margin", "pricing"],
-                "term_hints": ["sofr", "libor", "base rate", "prime rate", "interest rate"],
-                "pattern": r"(SOFR|LIBOR|Base Rate|Prime Rate)",
-            },
-            {
-                "name": "conditions_precedent",
-                "required": False,
-                "section_hints": ["conditions precedent", "conditions to borrowing", "borrowing", "advances"],
-                "term_hints": ["condition precedent", "conditions", "borrowing", "request", "notice"],
-            },
-            {
-                "name": "excess_cash_flow_definition",
-                "required": False,
-                "section_hints": ["definitions", "defined terms"],
-                "term_hints": ["excess cash flow", "means"],
-            },
-        ],
-    },
-    "compliance_certificate": {
-        "version": "v1",
-        "fields": [
-            {
-                "name": "reporting_period_end",
-                "required": True,
-                "section_hints": ["reporting period", "period end", "fiscal quarter"],
-                "term_hints": ["period", "quarter", "ended", "as of"],
-                "pattern": r"(?:for the period ended|as of)\s+([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})",
-            },
-            {
-                "name": "leverage_ratio",
-                "required": True,
-                "section_hints": ["financial covenant", "leverage ratio", "ratio"],
-                "term_hints": ["leverage ratio", "total leverage", "ratio"],
-                "pattern": r"(\d+(?:\.\d+)?x)",
-            },
-            {
-                "name": "compliance_status",
-                "required": True,
-                "section_hints": ["compliance", "certification", "officer certificate"],
-                "term_hints": ["in compliance", "not in compliance", "complies", "default"],
-                "pattern": r"(in compliance|not in compliance|complies|does not comply)",
-            },
-        ],
-    },
-    "rate_notice": {
-        "version": "v1",
-        "fields": [
-            {
-                "name": "effective_date",
-                "required": True,
-                "section_hints": ["rate notice", "effective", "interest period"],
-                "term_hints": ["effective", "interest period", "date"],
-                "pattern": r"(?:effective|as of)\s+([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})",
-            },
-            {
-                "name": "benchmark_rate",
-                "required": True,
-                "section_hints": ["benchmark", "reference rate", "interest"],
-                "term_hints": ["sofr", "libor", "base rate", "prime"],
-                "pattern": r"(SOFR|LIBOR|Base Rate|Prime Rate)",
-            },
-            {
-                "name": "margin",
-                "required": False,
-                "section_hints": ["applicable margin", "spread", "pricing"],
-                "term_hints": ["margin", "spread", "bps"],
-                "pattern": r"(\d+(?:\.\d+)?\s?(?:%|bps))",
-            },
-        ],
-    },
-}
+
+_SCHEMA_DIR = Path(__file__).resolve().parent / "finance"
+_DEFAULT_DOC_TYPE = "credit_agreement"
+
+
+def _read_yaml(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text()) or {}
+    if not isinstance(payload, dict):
+        raise ValueError(f"Schema file must contain a YAML object: {path}")
+    return payload
+
+
+def _normalize_schema_payload(payload: dict[str, Any], *, document_type_hint: str | None) -> tuple[str, dict[str, Any]]:
+    schema = payload.get("schema", payload)
+    if not isinstance(schema, dict):
+        raise ValueError("Schema payload must be an object")
+
+    fields = schema.get("fields")
+    if not isinstance(fields, list):
+        raise ValueError("Schema must include a 'fields' list")
+
+    document_type = str(payload.get("document_type") or document_type_hint or _DEFAULT_DOC_TYPE).strip()
+    schema.setdefault("version", "v1")
+    schema.setdefault("validations", [])
+    return document_type, schema
+
+
+def _builtin_schema_path(document_type: str) -> Path:
+    return _SCHEMA_DIR / f"{document_type}.yaml"
 
 
 def list_document_types() -> list[str]:
-    return sorted(SCHEMAS.keys())
+    if not _SCHEMA_DIR.exists():
+        return []
+    return sorted(path.stem for path in _SCHEMA_DIR.glob("*.yaml"))
 
 
-def resolve_schema(document_type: str | None) -> tuple[str, dict[str, Any]]:
-    if document_type and document_type in SCHEMAS:
-        return document_type, SCHEMAS[document_type]
-    return "credit_agreement", SCHEMAS["credit_agreement"]
+def resolve_schema(document_type: str | None = None, schema_path: str | None = None) -> tuple[str, dict[str, Any]]:
+    if schema_path:
+        path = Path(schema_path).expanduser().resolve()
+        if not path.exists():
+            raise FileNotFoundError(f"Schema file not found: {path}")
+        payload = _read_yaml(path)
+        hint = document_type or path.stem
+        return _normalize_schema_payload(payload, document_type_hint=hint)
+
+    resolved_doc_type = (document_type or _DEFAULT_DOC_TYPE).strip() or _DEFAULT_DOC_TYPE
+    candidate = _builtin_schema_path(resolved_doc_type)
+    if not candidate.exists():
+        candidate = _builtin_schema_path(_DEFAULT_DOC_TYPE)
+    payload = _read_yaml(candidate)
+    return _normalize_schema_payload(payload, document_type_hint=resolved_doc_type)
 

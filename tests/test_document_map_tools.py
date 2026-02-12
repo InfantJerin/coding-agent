@@ -64,6 +64,23 @@ class DocumentMapToolsTests(unittest.TestCase):
         self.assertGreaterEqual(len(doc_map["sections"]), 1)
         self.assertTrue(any(section.get("source") == "llm" for section in doc_map["sections"]))
 
+    def test_generic_parse_strategy_builds_page_sections(self) -> None:
+        document_store = {
+            "documents": [
+                {
+                    "doc_id": "doc-0",
+                    "path": "generic.txt",
+                    "name": "generic.txt",
+                    "pages": ["Compliance Certificate\nFor the period ended March 31, 2026\nBorrower is in compliance."],
+                    "total_pages": 1,
+                    "outlines": [],
+                }
+            ]
+        }
+        doc_map = BuildDocMapTool().run(document_store=document_store, parse_strategy="generic")
+        self.assertTrue(doc_map["sections"])
+        self.assertTrue(any(section.get("source") == "generic" for section in doc_map["sections"]))
+
 
 if __name__ == "__main__":
     unittest.main()

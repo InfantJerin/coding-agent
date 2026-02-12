@@ -55,6 +55,9 @@ def main() -> int:
         action="store_true",
         help="Print tool trace in agent mode",
     )
+    parser.add_argument("--document-type", help="Document type hint for schema/strategy selection in agent mode")
+    parser.add_argument("--schema-path", help="Optional YAML schema path override for extraction")
+    parser.add_argument("--strategy-path", help="Optional YAML strategy path override for runner sequencing")
     args = parser.parse_args()
 
     mode = "headless" if args.headless else args.mode
@@ -80,6 +83,11 @@ def main() -> int:
         instruction=args.instruction,
         documents=[Path(p) for p in args.documents],
         query=args.query,
+        metadata={
+            "document_type": args.document_type,
+            "schema_path": args.schema_path,
+            "strategy_path": args.strategy_path,
+        },
     )
     print(response)
     if args.show_trace:
