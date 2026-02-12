@@ -25,8 +25,11 @@ src/tools/bash_tools.py
 src/tools/document_tools.py
 src/tools/finance_tools.py
 src/tools/retrieval_tools.py
+src/tools/state_tools.py
+tests/test_document_map_tools.py
 tests/test_finance_tools.py
 tests/test_model_selection.py
+tests/test_ops_agent_flow.py
 tests/test_provider_priority.py
 tests/test_retrieval_tools.py
 tests/test_tool_policy.py

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
@@ -8,12 +9,19 @@ from typing import Any
 
 
 SECTION_RE = re.compile(r"^(?:Section|SECTION)\s+(\d+(?:\.\d+)*)\s*[:.-]?\s*(.*)$")
+NUMERIC_HEADING_RE = re.compile(r"^(\d+(?:\.\d+){1,4})\s+([A-Za-z][A-Za-z0-9 ,:;()'\"/&-]{2,})$")
+ARTICLE_RE = re.compile(r"^(?:Article|ARTICLE)\s+([IVXLCM]+|[A-Z])\s*[:.-]?\s*(.*)$")
 DEF_RE = re.compile(r"[\"“]([A-Za-z][A-Za-z0-9\s\-/()]+)[\"”]\s+means\s+(.+)", re.IGNORECASE)
+DEF_RE_UNQUOTED = re.compile(
+    r"^([A-Z][A-Za-z0-9\s\-/()]{2,80})\s+means\s+(.+)$",
+    re.IGNORECASE,
+)
 SECTION_REF_RE = re.compile(r"Section\s+(\d+(?:\.\d+)*)", re.IGNORECASE)
+ARTICLE_REF_RE = re.compile(r"Article\s+([IVXLCM]+|[A-Z])", re.IGNORECASE)
 DEFINED_REF_RE = re.compile(r"as\s+defined\s+in\s+[\"“]([^\"”]+)[\"”]", re.IGNORECASE)
 
 
-def _extract_pdf_pages(path: Path) -> list[str]:
+def _extract_pdf_pages_and_outlines(path: Path) -> tuple[list[str], list[dict[str, Any]]]:
     try:
         from pypdf import PdfReader  # type: ignore
 
@@ -21,8 +29,38 @@ def _extract_pdf_pages(path: Path) -> list[str]:
         pages: list[str] = []
         for page in reader.pages:
             pages.append((page.extract_text() or "").strip())
+
+        outlines: list[dict[str, Any]] = []
+        try:
+            raw_outline = getattr(reader, "outline", None)
+            if raw_outline:
+                def walk(nodes: list[Any], level: int) -> None:
+                    for node in nodes:
+                        if isinstance(node, list):
+                            walk(node, level + 1)
+                            continue
+                        title = str(getattr(node, "title", "") or "").strip()
+                        if not title:
+                            continue
+                        page_no: int | None = None
+                        try:
+                            page_no = reader.get_destination_page_number(node) + 1
+                        except Exception:
+                            page_no = None
+                        outlines.append(
+                            {
+                                "title": title,
+                                "page": page_no,
+                                "level": level,
+                            }
+                        )
+
+                walk(list(raw_outline), 1)
+        except Exception:
+            outlines = []
+
         if pages:
-            return pages
+            return pages, outlines
     except Exception:
         pass
 
@@ -35,10 +73,18 @@ def _extract_pdf_pages(path: Path) -> list[str]:
             check=False,
         )
         if completed.returncode == 0 and completed.stdout.strip():
-            # We do not get reliable page splits here, so use a single-page fallback.
-            return [completed.stdout]
+            # pdftotext separates pages with form-feed (\f) characters.
+            parts = [part.strip() for part in completed.stdout.split("\f")]
+            pages = [part for part in parts if part]
+            if pages:
+                return pages, []
 
-    return [path.read_bytes().decode("utf-8", errors="ignore")]
+    if os.getenv("PDF_ALLOW_BINARY_FALLBACK", "").strip() == "1":
+        return [path.read_bytes().decode("utf-8", errors="ignore")], []
+
+    raise RuntimeError(
+        "No PDF extractor available. Install `pypdf` (recommended) or `pdftotext`."
+    )
 
 
 def _extract_text_pages(path: Path) -> list[str]:
@@ -46,6 +92,61 @@ def _extract_text_pages(path: Path) -> list[str]:
     page_splits = re.split(r"\n\s*\[PAGE\s+\d+\]\s*\n", text)
     cleaned = [part.strip() for part in page_splits if part.strip()]
     return cleaned if cleaned else [text]
+
+
+def _normalize_section_key(value: str) -> str:
+    return value.strip().lower().replace(" ", "")
+
+
+def _detect_heading(block: str) -> dict[str, Any] | None:
+    section_match = SECTION_RE.match(block)
+    if section_match:
+        section_no = section_match.group(1)
+        title = section_match.group(2).strip() or f"Section {section_no}"
+        return {
+            "kind": "section",
+            "section_no": section_no,
+            "title": title,
+            "level": section_no.count(".") + 1,
+        }
+
+    numeric_match = NUMERIC_HEADING_RE.match(block)
+    if numeric_match:
+        section_no = numeric_match.group(1)
+        title = numeric_match.group(2).strip()
+        return {
+            "kind": "section",
+            "section_no": section_no,
+            "title": title,
+            "level": section_no.count(".") + 1,
+        }
+
+    article_match = ARTICLE_RE.match(block)
+    if article_match:
+        article_no = article_match.group(1).strip()
+        title = article_match.group(2).strip() or f"Article {article_no}"
+        return {
+            "kind": "article",
+            "section_no": f"ARTICLE-{article_no}",
+            "title": title,
+            "level": 1,
+        }
+
+    return None
+
+
+def _detect_definition(block: str) -> tuple[str, str] | None:
+    quoted = DEF_RE.search(block)
+    if quoted:
+        return quoted.group(1).strip(), quoted.group(2).strip()
+    unquoted = DEF_RE_UNQUOTED.match(block)
+    if unquoted:
+        term = unquoted.group(1).strip()
+        text = unquoted.group(2).strip()
+        # Skip obvious sentence-like false positives.
+        if len(term.split()) <= 8:
+            return term, text
+    return None
 
 
 def _normalize_query_tokens(value: str) -> list[str]:
@@ -80,9 +181,10 @@ class LoadDocumentsTool:
 
             doc_id = f"doc-{index}"
             if path.suffix.lower() == ".pdf":
-                pages = _extract_pdf_pages(path)
+                pages, outlines = _extract_pdf_pages_and_outlines(path)
             else:
                 pages = _extract_text_pages(path)
+                outlines = []
 
             docs.append(
                 {
@@ -91,6 +193,7 @@ class LoadDocumentsTool:
                     "name": path.name,
                     "pages": pages,
                     "total_pages": len(pages),
+                    "outlines": outlines,
                 }
             )
         return {"documents": docs}
@@ -107,14 +210,17 @@ class BuildDocMapTool:
 
         section_index: dict[str, str] = {}
         definition_index: dict[str, str] = {}
+        page_first_anchor: dict[tuple[str, int], str] = {}
 
         xref_counter = 0
+        pending_xrefs: list[dict[str, Any]] = []
         for doc in document_store["documents"]:
             doc_id = doc["doc_id"]
             for page_num, page_text in enumerate(doc["pages"], start=1):
                 raw_blocks = [line.strip() for line in page_text.splitlines() if line.strip()]
                 for block_num, block in enumerate(raw_blocks, start=1):
                     anchor = f"{doc_id}:p{page_num}:b{block_num}"
+                    page_first_anchor.setdefault((doc_id, page_num), anchor)
                     anchors[anchor] = {
                         "doc_id": doc_id,
                         "page": page_num,
@@ -122,10 +228,10 @@ class BuildDocMapTool:
                         "text": block,
                     }
 
-                    section_match = SECTION_RE.match(block)
-                    if section_match:
-                        section_no = section_match.group(1)
-                        title = section_match.group(2).strip() or f"Section {section_no}"
+                    heading = _detect_heading(block)
+                    if heading:
+                        section_no = heading["section_no"]
+                        title = heading["title"]
                         section_id = f"{doc_id}:section:{section_no}"
                         sections.append(
                             {
@@ -133,18 +239,19 @@ class BuildDocMapTool:
                                 "doc_id": doc_id,
                                 "section_no": section_no,
                                 "title": title,
-                                "level": section_no.count(".") + 1,
+                                "level": heading["level"],
                                 "page_start": page_num,
                                 "page_end": page_num,
                                 "anchor": anchor,
+                                "block_start": block_num,
+                                "source": "text",
                             }
                         )
-                        section_index[f"{doc_id}:{section_no}"] = anchor
+                        section_index[f"{doc_id}:{_normalize_section_key(section_no)}"] = anchor
 
-                    def_match = DEF_RE.search(block)
-                    if def_match:
-                        term = def_match.group(1).strip()
-                        term_text = def_match.group(2).strip()
+                    definition = _detect_definition(block)
+                    if definition:
+                        term, term_text = definition
                         definition_id = f"{doc_id}:def:{term.lower()}"
                         definitions.append(
                             {
@@ -158,29 +265,114 @@ class BuildDocMapTool:
                         definition_index[f"{doc_id}:{term.lower()}"] = anchor
 
                     for ref in SECTION_REF_RE.findall(block):
-                        xrefs.append(
+                        pending_xrefs.append(
                             {
                                 "id": f"xref-{xref_counter}",
                                 "from_anchor": anchor,
                                 "ref_type": "section_ref",
                                 "target_text": ref,
-                                "resolved_anchor": section_index.get(f"{doc_id}:{ref}"),
+                            }
+                        )
+                        xref_counter += 1
+
+                    for ref in ARTICLE_REF_RE.findall(block):
+                        pending_xrefs.append(
+                            {
+                                "id": f"xref-{xref_counter}",
+                                "from_anchor": anchor,
+                                "ref_type": "article_ref",
+                                "target_text": ref,
                             }
                         )
                         xref_counter += 1
 
                     for ref in DEFINED_REF_RE.findall(block):
-                        key = ref.strip().lower()
-                        xrefs.append(
+                        pending_xrefs.append(
                             {
                                 "id": f"xref-{xref_counter}",
                                 "from_anchor": anchor,
                                 "ref_type": "definition_ref",
                                 "target_text": ref.strip(),
-                                "resolved_anchor": definition_index.get(f"{doc_id}:{key}"),
                             }
                         )
                         xref_counter += 1
+
+            for idx, outline in enumerate(doc.get("outlines", []), start=1):
+                page_no = outline.get("page")
+                if not isinstance(page_no, int) or page_no < 1:
+                    continue
+                anchor = page_first_anchor.get((doc_id, page_no))
+                if not anchor:
+                    continue
+                raw_title = str(outline.get("title", "")).strip()
+                heading = _detect_heading(raw_title)
+                section_no = heading["section_no"] if heading else f"OUTLINE-{idx}"
+                title = heading["title"] if heading else raw_title
+                level = int(outline.get("level", 1))
+                sections.append(
+                    {
+                        "id": f"{doc_id}:section:{section_no}",
+                        "doc_id": doc_id,
+                        "section_no": section_no,
+                        "title": title,
+                        "level": max(1, level),
+                        "page_start": page_no,
+                        "page_end": page_no,
+                        "anchor": anchor,
+                        "block_start": 1,
+                        "source": "outline",
+                    }
+                )
+                section_index.setdefault(
+                    f"{doc_id}:{_normalize_section_key(section_no)}",
+                    anchor,
+                )
+
+        # Resolve xrefs in a second pass so forward references are handled.
+        for ref in pending_xrefs:
+            from_anchor = ref["from_anchor"]
+            from_doc = anchors[from_anchor]["doc_id"]
+            resolved_anchor: str | None = None
+            if ref["ref_type"] in {"section_ref", "article_ref"}:
+                raw_target = ref["target_text"].strip()
+                if ref["ref_type"] == "article_ref":
+                    raw_target = f"ARTICLE-{raw_target}"
+                section_key = f"{from_doc}:{_normalize_section_key(raw_target)}"
+                resolved_anchor = section_index.get(section_key)
+            elif ref["ref_type"] == "definition_ref":
+                def_key = f"{from_doc}:{ref['target_text'].strip().lower()}"
+                resolved_anchor = definition_index.get(def_key)
+
+            xrefs.append(
+                {
+                    **ref,
+                    "resolved_anchor": resolved_anchor,
+                }
+            )
+
+        # Infer section page_end by next section start page within each document.
+        sections.sort(
+            key=lambda s: (
+                s["doc_id"],
+                int(s["page_start"]),
+                int(s.get("block_start", 1)),
+            )
+        )
+        max_page_by_doc = {
+            d["doc_id"]: int(d["total_pages"])
+            for d in document_store["documents"]
+        }
+        for idx, section in enumerate(sections):
+            doc_id = section["doc_id"]
+            next_section = None
+            for j in range(idx + 1, len(sections)):
+                if sections[j]["doc_id"] == doc_id:
+                    next_section = sections[j]
+                    break
+            if next_section:
+                section["page_end"] = max(section["page_start"], next_section["page_start"] - 1)
+            else:
+                section["page_end"] = max_page_by_doc.get(doc_id, section["page_start"])
 
         return {
             "document_store": document_store,
@@ -391,16 +583,31 @@ class FollowReferenceTool:
             raise KeyError(f"Unknown ref_id: {ref_id}")
 
         if target_text and doc_id:
+            normalized_target = _normalize_section_key(target_text)
             sec_match = re.search(r"(\d+(?:\.\d+)*)", target_text)
-            if sec_match:
-                sec_no = sec_match.group(1)
-                for section in doc_map["sections"]:
-                    if section["doc_id"] == doc_id and section["section_no"] == sec_no:
-                        return {
-                            "resolved": True,
-                            "anchor": section["anchor"],
-                            "ref": {"ref_type": "section_ref", "target_text": target_text},
-                        }
+            article_match = re.search(r"(?:article)\s+([ivxlcm]+|[a-z])", target_text, re.IGNORECASE)
+            for section in doc_map["sections"]:
+                if section["doc_id"] != doc_id:
+                    continue
+                section_key = _normalize_section_key(section["section_no"])
+                if normalized_target in section_key or section_key in normalized_target:
+                    return {
+                        "resolved": True,
+                        "anchor": section["anchor"],
+                        "ref": {"ref_type": "section_ref", "target_text": target_text},
+                    }
+                if sec_match and section["section_no"] == sec_match.group(1):
+                    return {
+                        "resolved": True,
+                        "anchor": section["anchor"],
+                        "ref": {"ref_type": "section_ref", "target_text": target_text},
+                    }
+                if article_match and section_key == f"article-{article_match.group(1).lower()}":
+                    return {
+                        "resolved": True,
+                        "anchor": section["anchor"],
+                        "ref": {"ref_type": "article_ref", "target_text": target_text},
+                    }
 
             term_key = target_text.strip().lower()
             for definition in doc_map["definitions"]:
