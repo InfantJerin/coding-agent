@@ -1,25 +1,42 @@
 ---
 name: finance-docs
-description: Financial document extraction and Q&A pack for PDFs and text agreements. Use when the agent must ingest financial/legal documents, extract covenant and pricing terms, build retrievable chunks, and answer questions with evidence citations.
+description: Loan-ops style financial document extraction and Q&A pack for section-indexed documents. Use when the agent must read credit agreements (or similar finance docs), extract key terms with evidence, and answer questions with reasons and citations.
 ---
 
 # Finance Docs Skill
 
-Use this ops-style traversal policy for document tasks:
+Use this loan-ops traversal policy for document tasks:
 
 1. `load_documents`
 2. `build_doc_map`
-3. `search_in_doc`
-4. `read_span`
-5. `follow_reference`
-6. `read_definition`
-7. `write_scratchpad`
-8. `quote_evidence`
-9. `consistency_check`
-10. `build_ops_answer`
+3. `extract_finance_signals` (schema + multi-pass extraction over index)
+4. `search_in_doc`
+5. `read_span`
+6. `follow_reference`
+7. `read_definition`
+8. `write_scratchpad`
+9. `quote_evidence`
+10. `consistency_check`
+11. `build_ops_answer`
 
-Always cite anchors in answers and maintain a reading trail.
-When references are unresolved, record them in open questions and report clearly.
+## Extraction Method
+
+For extraction requests, use this sequence:
+
+1. Build structure index first (`sections`, `definitions`, `xrefs`, anchors).
+2. Identify relevant section families for each target field.
+3. Extract field values from those sections with definition context.
+4. Run consistency checks and return unresolved items explicitly.
+
+## Behavior Rules
+
+- Always cite anchors in answers and extraction reasons.
+- Prefer section/definition evidence over raw global scans.
+- Follow references when a term depends on another section/definition.
+- Record unresolved references/fields as open questions.
+- Treat `document_type` as configurable:
+  - Start with `credit_agreement`.
+  - Reuse same workflow for other finance docs (for example, `compliance_certificate`) via schema changes.
 
 ## References
 

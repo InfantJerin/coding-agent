@@ -44,6 +44,14 @@ The agent now follows:
 7. Quote evidence and run consistency check
 8. Produce cited answer
 
+Extraction is schema-driven and multi-pass:
+
+1. Structure pass: use section/page index and definition map.
+2. Field pass: extract target terms per document schema.
+3. Validation pass: run consistency checks and report issues.
+
+`document_type` can be set in task metadata (for example: `credit_agreement`, `compliance_certificate`).
+
 ## LLM Index Fallback
 
 If TOC extraction is unavailable or weak, `build_doc_map` can use the configured LLM to propose a basic section index (`source: "llm"`), then merge it with parsed headings/outlines.

@@ -179,6 +179,8 @@ class GenericHeadlessAgent:
             "extract_finance_signals",
             text=combined_text,
             instruction=task.instruction,
+            doc_map=doc_map,
+            document_type=str(task.metadata.get("document_type", "") or "").strip() or None,
         )
 
         answers = [
@@ -253,6 +255,8 @@ class GenericHeadlessAgent:
             "extract_finance_signals",
             text=combined_text,
             instruction=instruction,
+            doc_map=doc_map,
+            document_type=None,
         )
 
         result = self._ops_answer_question(
@@ -283,5 +287,14 @@ class GenericHeadlessAgent:
         lines.append("## Extracted Signals")
         for key, values in extraction.get("signals", {}).items():
             lines.append(f"- {key}: {', '.join(values) if values else 'None detected'}")
+        if extraction.get("field_extraction"):
+            lines.append("")
+            lines.append("## Extracted Terms")
+            lines.append(f"- document_type: {extraction.get('document_type', 'unknown')}")
+            consistency = extraction.get("consistency", {})
+            lines.append(f"- consistency: {consistency.get('status')} ({consistency.get('score')})")
+            for field_name, field_data in extraction.get("field_extraction", {}).items():
+                value = field_data.get("value") or "Not found"
+                lines.append(f"- {field_name}: {value}")
 
         return "\n".join(lines), trace
