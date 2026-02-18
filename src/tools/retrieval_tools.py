@@ -62,19 +62,29 @@ class ChunkDocMapSectionsTool:
             joined = " ".join(texts).strip()
             if not joined:
                 continue
-            chunk_text = joined[:max_chars]
-            chunks.append(
-                {
-                    "chunk_id": f"{doc_id}:{section_no}",
-                    "doc_id": doc_id,
-                    "section_no": section_no,
-                    "title": title,
-                    "start_page": start,
-                    "end_page": end,
-                    "anchors": anchors[:20],
-                    "text": chunk_text,
-                }
-            )
+            overlap = 200
+            step = max(1, max_chars - overlap)
+            offset = 0
+            i = 0
+            while offset < len(joined):
+                sub_text = joined[offset : offset + max_chars]
+                suffix = f":{i}" if i > 0 else ""
+                chunks.append(
+                    {
+                        "chunk_id": f"{doc_id}:{section_no}{suffix}",
+                        "doc_id": doc_id,
+                        "section_no": section_no,
+                        "title": title,
+                        "start_page": start,
+                        "end_page": end,
+                        "anchors": anchors[:20],
+                        "text": sub_text,
+                    }
+                )
+                if offset + max_chars >= len(joined):
+                    break
+                offset += step
+                i += 1
 
         for definition in doc_map.get("definitions", []):
             chunk_id = f"{definition.get('doc_id')}::def::{definition.get('term')}"
@@ -125,17 +135,17 @@ class BuildChunkIndexTool:
 class RetrieveChunksTool:
     name = "retrieve_chunks"
 
-    def run(self, query: str, index: dict[str, Any], top_k: int = 5) -> list[dict[str, Any]]:
+    def run(self, query: str, chunk_index: dict[str, Any], top_k: int = 5) -> list[dict[str, Any]]:
         query_terms = _tokenize(query)
         if not query_terms:
             return []
 
-        chunks = {chunk["chunk_id"]: chunk for chunk in index.get("chunks", [])}
-        tf = index.get("tf", {})
-        df = index.get("df", {})
-        lengths = index.get("lengths", {})
-        avg_len = index.get("avg_len", 0) or 1
-        doc_count = index.get("doc_count", 0) or 1
+        chunks = {chunk["chunk_id"]: chunk for chunk in chunk_index.get("chunks", [])}
+        tf = chunk_index.get("tf", {})
+        df = chunk_index.get("df", {})
+        lengths = chunk_index.get("lengths", {})
+        avg_len = chunk_index.get("avg_len", 0) or 1
+        doc_count = chunk_index.get("doc_count", 0) or 1
 
         k1 = 1.5
         b = 0.75
@@ -168,5 +178,9 @@ class RetrieveChunksTool:
                 row["section_no"] = chunk.get("section_no")
                 row["title"] = chunk.get("title")
                 row["anchors"] = chunk.get("anchors", [])
+                if chunk.get("start_page") is not None:
+                    row["page_start"] = chunk["start_page"]
+                if chunk.get("end_page") is not None:
+                    row["page_end"] = chunk["end_page"]
             results.append(row)
         return results

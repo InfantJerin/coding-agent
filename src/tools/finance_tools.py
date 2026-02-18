@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import re
 from typing import Any
 
@@ -9,8 +10,25 @@ from llm.providers import LLMClient
 from schemas.finance_registry import list_document_types, resolve_schema
 
 
+def _safe_parse_json(raw: str) -> dict[str, Any] | None:
+    try:
+        return json.loads(raw)
+    except Exception:
+        # Try to find a JSON object in the string
+        m = re.search(r"\{.*\}", raw, re.DOTALL)
+        if m:
+            try:
+                return json.loads(m.group(0))
+            except Exception:
+                pass
+    return None
+
+
 class ExtractFinanceSignalsTool:
     name = "extract_finance_signals"
+
+    def __init__(self, llm_client: LLMClient | None = None) -> None:
+        self.llm_client = llm_client
 
     _patterns = {
         "facility_amount": re.compile(r"\$\s?\d[\d,]*(?:\.\d+)?\s?(?:million|billion|m)?", re.IGNORECASE),
@@ -86,6 +104,35 @@ class ExtractFinanceSignalsTool:
                     return (m.group(1) or "").strip()
                 return m.group(0).strip()
         return None
+
+    def _llm_extract_field(
+        self,
+        field_name: str,
+        field_description: str,
+        candidate_blocks: list[dict[str, Any]],
+    ) -> tuple[str | None, str | None]:
+        """Use LLM to extract a field value from candidate blocks.
+        Returns (value, quoted_text) or (None, None) on failure."""
+        if not self.llm_client or not candidate_blocks:
+            return None, None
+        context = "\n\n".join(b["text"] for b in candidate_blocks[:6])
+        prompt = (
+            f'Extract the value of "{field_name}" from the following text.\n'
+            f"Field description: {field_description}\n"
+            f'Return JSON: {{"value": "<extracted value or null>", "quoted_text": "<exact quote>"}}\n\n'
+            f"Text:\n{context}"
+        )
+        try:
+            raw = self.llm_client.generate(
+                system_prompt="You are a financial term extractor. Return only valid JSON.",
+                user_prompt=prompt,
+            )
+            parsed = _safe_parse_json(raw)
+            if parsed and parsed.get("value") and parsed["value"] != "null":
+                return str(parsed["value"]), parsed.get("quoted_text")
+        except Exception:
+            pass
+        return None, None
 
     def _extract_best_snippet(self, blocks: list[dict[str, Any]], hints: list[str]) -> str | None:
         if not blocks:
@@ -213,6 +260,13 @@ class ExtractFinanceSignalsTool:
             ranked_blocks = [row[1] for row in scored[:8]]
 
             value = self._extract_from_pattern(pattern=field.get("pattern"), blocks=ranked_blocks)
+            if not value and ranked_blocks:
+                llm_value, _ = self._llm_extract_field(
+                    field_name=name,
+                    field_description=field.get("description", " ".join(field["term_hints"])),
+                    candidate_blocks=ranked_blocks,
+                )
+                value = llm_value
             if not value:
                 value = self._extract_best_snippet(blocks=ranked_blocks, hints=field["term_hints"])
 

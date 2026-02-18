@@ -13,7 +13,7 @@ class RetrievalToolsTests(unittest.TestCase):
         )
         chunks = ChunkDocumentTool().run(text=text, chunk_size=80, overlap=0)
         index = BuildChunkIndexTool().run(chunks=chunks)
-        hits = RetrieveChunksTool().run(query="What is the maturity date?", index=index, top_k=2)
+        hits = RetrieveChunksTool().run(query="What is the maturity date?", chunk_index=index, top_k=2)
 
         self.assertTrue(hits)
         merged = " ".join(hit["text"].lower() for hit in hits)
@@ -25,7 +25,7 @@ class RetrievalToolsTests(unittest.TestCase):
         chunks = ChunkDocMapSectionsTool().run(doc_map=doc_map, max_chars=500)
         self.assertTrue(chunks)
         index = BuildChunkIndexTool().run(chunks=chunks)
-        hits = RetrieveChunksTool().run(query="Applicable Margin means", index=index, top_k=3)
+        hits = RetrieveChunksTool().run(query="Applicable Margin means", chunk_index=index, top_k=3)
         self.assertTrue(hits)
         self.assertTrue(any("section_no" in item for item in hits))
 

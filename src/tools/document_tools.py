@@ -759,7 +759,15 @@ class ReadSpanTool:
                 "spans": [{"anchor": anchor, "page": data["page"], "block": data["block"], "char_start": 0, "char_end": len(data["text"])}],
             }
 
-        if page_range and doc_id:
+        if page_range:
+            # Default doc_id to the first document when not provided
+            if not doc_id:
+                docs = doc_map.get("document_store", {}).get("documents", [])
+                if len(docs) == 1:
+                    doc_id = docs[0]["doc_id"]
+                else:
+                    raise ValueError("Provide either anchor or (doc_id and page_range)")
+
             start = int(page_range.get("start", 1))
             end = int(page_range.get("end", start))
             if end < start:
@@ -800,6 +808,16 @@ class SearchInDocTool:
                 score += 3
             if "default" in q_lower and "default" in low:
                 score += 3
+            # Financial structure terms
+            if any(t in q_lower for t in ("facility", "facilities", "tranche", "commitment")) and \
+               any(t in low for t in ("facility", "facilities", "tranche", "commitment")):
+                score += 3
+            if any(t in q_lower for t in ("interest", "rate", "margin", "sofr")) and \
+               any(t in low for t in ("interest", "rate", "margin", "sofr")):
+                score += 3
+            if any(t in q_lower for t in ("repayment", "prepayment", "amortization")) and \
+               any(t in low for t in ("repayment", "prepayment", "amortization")):
+                score += 3
             return score
 
         candidates: list[dict[str, Any]] = []
@@ -808,9 +826,14 @@ class SearchInDocTool:
             # Tree-first (PageIndex-inspired): score nodes before raw blocks.
             for doc_id, roots in doc_map.get("section_tree", {}).items():
                 for node in _flatten_tree(roots):
+                    # Skip TOC index entries — their anchor points back to the TOC page,
+                    # not the actual content page, so they produce useless results.
+                    section_no = node.get("section_no", "")
+                    if str(section_no).startswith("TOC-"):
+                        continue
                     anchor = node.get("anchor")
                     anchor_data = doc_map["anchors"].get(anchor, {}) if anchor else {}
-                    text = f"{node.get('section_no','')} {node.get('title','')} {anchor_data.get('text','')}"
+                    text = f"{section_no} {node.get('title','')} {anchor_data.get('text','')}"
                     if node.get("summary"):
                         text = f"{text} {node['summary']}"
                     if node.get("key_events"):
@@ -823,11 +846,11 @@ class SearchInDocTool:
                                 "score": score,
                                 "anchor": anchor,
                                 "doc_id": doc_id,
-                                "section_no": node.get("section_no"),
+                                "section_no": section_no,
                                 "title": node.get("title"),
-                                "node_id": node.get("node_id"),
-                                "start_index": node.get("start_index"),
-                                "end_index": node.get("end_index"),
+                                # page_start/page_end let the LLM navigate directly to content
+                                "page_start": node.get("start_index"),
+                                "page_end": node.get("end_index"),
                                 "text": anchor_data.get("text", ""),
                             }
                         )

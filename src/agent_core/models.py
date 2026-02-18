@@ -74,3 +74,10 @@ class SessionState:
     checkpoints: list[dict[str, Any]] = field(default_factory=list)
     prompt_context: dict[str, Any] = field(default_factory=dict)
     memory: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ChatMessage:
+    role: str   # "user" | "assistant"
+    content: str
+    at: str     # ISO timestamp
