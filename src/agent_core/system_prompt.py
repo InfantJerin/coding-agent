@@ -29,6 +29,8 @@ _TOOL_DESCRIPTIONS: dict[str, str] = {
     "list_deals": "List all saved deals",
     "write_scratchpad": "Store an intermediate finding for later reference",
     "read_scratchpad": "Retrieve a stored finding",
+    "extract_tables": "Extract structured table rows/columns from a document page range",
+    "run_python": "Execute Python code for calculations; generate Excel files with citations in workspace",
 }
 
 

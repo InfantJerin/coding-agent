@@ -31,6 +31,7 @@ def run_chat_mode(deal_arg: str | None, initial_files: list[str] | None = None, 
     from llm.selection import resolve_model_ref
     from profiles.finance_docs import resolve_requested_model_from_env
     from tools.deal_tools import AddDocumentToDealTool, CreateDealTool, GetDealSummaryTool, ListDealsTool
+    from tools.excel_tools import ExtractTablesTool, RunPythonTool
     from tools.retrieval_tools import BuildChunkIndexTool, ChunkDocMapSectionsTool, RetrieveChunksTool
 
     data_dir = Path("./data")
@@ -69,6 +70,9 @@ def run_chat_mode(deal_arg: str | None, initial_files: list[str] | None = None, 
         )
         return 1
 
+    workspace_dir = str(Path("./workspace") / deal_meta.deal_id) if deal_meta else "./workspace"
+    Path(workspace_dir).mkdir(parents=True, exist_ok=True)
+
     # Build profile + add deal tools
     profile = build_finance_docs_profile()
     deal_tools = {
@@ -77,7 +81,13 @@ def run_chat_mode(deal_arg: str | None, initial_files: list[str] | None = None, 
         "get_deal_summary": GetDealSummaryTool(deal_store),
         "list_deals": ListDealsTool(deal_store),
     }
-    combined_tools = {**profile.registry.tools, **deal_tools, "retrieve_chunks": RetrieveChunksTool()}
+    combined_tools = {
+        **profile.registry.tools,
+        **deal_tools,
+        "retrieve_chunks": RetrieveChunksTool(),
+        "extract_tables": ExtractTablesTool(),
+        "run_python": RunPythonTool(),
+    }
     registry = ToolRegistry(tools=combined_tools)
     policy = ToolPolicy(allow=list(combined_tools.keys()), deny=[])
 
@@ -104,6 +114,7 @@ def run_chat_mode(deal_arg: str | None, initial_files: list[str] | None = None, 
         llm_client=llm_client,
         session_store=session_store,
         debug=debug,
+        workspace_dir=workspace_dir,
     )
 
     def _index_document(doc_path: str) -> None:

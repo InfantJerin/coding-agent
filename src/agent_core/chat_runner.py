@@ -32,12 +32,14 @@ class ContextBoundToolSet:
         doc_map: dict[str, Any] | None,
         scratchpad_state: dict[str, Any],
         chunk_index: dict[str, Any] | None = None,
+        workspace_dir: str = "",
     ) -> None:
         self.registry = registry
         self.policy = policy
         self.doc_map = doc_map or {}
         self.scratchpad_state = scratchpad_state
         self.chunk_index = chunk_index or {}
+        self.workspace_dir = workspace_dir
 
     def run(self, tool_name: str, user_params: dict[str, Any]) -> Any:
         self.policy.check(tool_name)
@@ -57,6 +59,8 @@ class ContextBoundToolSet:
             kwargs["text"] = "\n".join(text_parts)
         if "chunk_index" in bound:
             kwargs["chunk_index"] = self.chunk_index
+        if "workspace_dir" in bound:
+            kwargs["workspace_dir"] = self.workspace_dir
 
         return tool.run(**kwargs)
 
@@ -74,6 +78,7 @@ class ChatAgent:
         max_turns: int = 12,
         debug: bool = False,
         chunk_index: dict[str, Any] | None = None,
+        workspace_dir: str = "",
     ) -> None:
         self.session = session
         self.deal_meta = deal_meta
@@ -85,6 +90,7 @@ class ChatAgent:
         self.session_store = session_store
         self.max_turns = max_turns
         self.debug = debug
+        self.workspace_dir = workspace_dir
         self._scratchpad: dict[str, Any] = {}
         self._toolset = ContextBoundToolSet(
             registry=registry,
@@ -92,6 +98,7 @@ class ChatAgent:
             doc_map=self.doc_map,
             scratchpad_state=self._scratchpad,
             chunk_index=self.chunk_index,
+            workspace_dir=workspace_dir,
         )
 
     def _dbg(self, *parts: str) -> None:

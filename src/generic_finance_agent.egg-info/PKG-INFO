@@ -3,6 +3,10 @@ Name: generic-finance-agent
 Version: 0.1.0
 Summary: Generic headless agent with pluggable finance tools
 Requires-Python: >=3.10
+Requires-Dist: PyYAML>=6.0.1
+Requires-Dist: pdfplumber>=0.11.0
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: openpyxl>=3.1.0
 Provides-Extra: pdf
 Requires-Dist: pypdf>=5.0.0; extra == "pdf"
 Provides-Extra: dev

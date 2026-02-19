@@ -15,6 +15,8 @@ CHAT_TOOLS: list[str] = [
     "list_deals",
     "write_scratchpad",
     "read_scratchpad",
+    "extract_tables",
+    "run_python",
 ]
 
 # Anthropic tool JSON schemas (only user-facing parameters — no doc_map, no state)
@@ -196,6 +198,30 @@ TOOL_SPECS: dict[str, dict] = {
             "required": ["key"],
         },
     },
+    "extract_tables": {
+        "name": "extract_tables",
+        "description": "Extract structured tables (rows/columns) from a document page range using pdfplumber. Returns rows as lists of cell values.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "doc_id": {"type": "string", "description": "Document ID (e.g. 'doc-0')"},
+                "page_start": {"type": "integer"},
+                "page_end": {"type": "integer"},
+            },
+            "required": ["doc_id", "page_start", "page_end"],
+        },
+    },
+    "run_python": {
+        "name": "run_python",
+        "description": "Execute Python code for calculations and Excel generation. Code runs in the workspace directory with access to pandas and openpyxl. Print any filenames you create.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "code": {"type": "string", "description": "Python code to execute"},
+            },
+            "required": ["code"],
+        },
+    },
 }
 
 # Parameters that are pre-bound by the context (not passed by the LLM)
@@ -209,4 +235,6 @@ TOOL_BOUND_PARAMS: dict[str, list[str]] = {
     "extract_finance_signals": ["doc_map", "text"],
     "write_scratchpad": ["state"],
     "read_scratchpad": ["state"],
+    "extract_tables": ["doc_map"],
+    "run_python": ["workspace_dir"],
 }

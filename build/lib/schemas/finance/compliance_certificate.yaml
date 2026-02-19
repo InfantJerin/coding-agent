@@ -1,0 +1,20 @@
+document_type: compliance_certificate
+schema:
+  version: v1
+  fields:
+    - name: reporting_period_end
+      required: true
+      section_hints: ["reporting period", "period end", "fiscal quarter"]
+      term_hints: ["period", "quarter", "ended", "as of"]
+      pattern: "(?:for the period ended|as of)\\s+([A-Za-z]+\\s+\\d{1,2},\\s+\\d{4}|\\d{4}-\\d{2}-\\d{2})"
+    - name: leverage_ratio
+      required: true
+      section_hints: ["financial covenant", "leverage ratio", "ratio"]
+      term_hints: ["leverage ratio", "total leverage", "ratio"]
+      pattern: "(\\d+(?:\\.\\d+)?x)"
+    - name: compliance_status
+      required: true
+      section_hints: ["compliance", "certification", "officer certificate"]
+      term_hints: ["in compliance", "not in compliance", "complies", "default"]
+      pattern: "(in compliance|not in compliance|complies|does not comply)"
+

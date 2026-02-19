@@ -3,4 +3,5 @@ env_loader
 llm
 main
 profiles
+schemas
 tools
