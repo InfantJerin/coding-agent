@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -20,6 +21,32 @@ def load_task(path: Path) -> TaskRequest:
         output_modes=payload.get("output_modes", ["report", "json"]),
         metadata=payload.get("metadata", {}),
     )
+
+
+def _expand_file_references(user_input: str) -> str:
+    """Expand @filepath references by reading file contents and appending them."""
+    matches = re.findall(r"@([\w./~\-]+)", user_input)
+    if not matches:
+        return user_input
+
+    file_blocks: list[str] = []
+    for match in matches:
+        p = Path(match).expanduser()
+        if not p.is_absolute():
+            p = Path.cwd() / p
+        if p.is_file():
+            try:
+                content = p.read_text()
+                file_blocks.append(
+                    f"--- Content of {match} ---\n{content}\n--- End of {match} ---"
+                )
+            except Exception:
+                pass
+
+    if not file_blocks:
+        return user_input
+
+    return user_input + "\n\n" + "\n\n".join(file_blocks)
 
 
 def run_chat_mode(deal_arg: str | None, initial_files: list[str] | None = None, debug: bool = False) -> int:
@@ -205,7 +232,8 @@ def run_chat_mode(deal_arg: str | None, initial_files: list[str] | None = None, 
             continue
 
         try:
-            reply = agent.send(user_input)
+            expanded = _expand_file_references(user_input)
+            reply = agent.send(expanded)
             print(reply)
         except Exception as exc:
             print(f"[error] {exc}", file=sys.stderr)
