@@ -110,4 +110,22 @@ See:
 
 - `docs/architecture/generic-agent-finance.md`
 
+## Deal Agent Platform Scaffold (New)
+
+A new modular scaffold aligned with the design docs now exists under:
+
+- `src/deal_agent_platform/domain/`: context, event, fact-ledger, gate, and decision-bundle models
+- `src/deal_agent_platform/application/`: workflow engine + ingestion/gate/approval services
+- `src/deal_agent_platform/channel_bridge/`: context resolver + event normalizer + dispatcher bridge
+- `src/deal_agent_platform/policy/`: OPA-like 4-check policy engine and starter Rego policy
+- `src/deal_agent_platform/infrastructure/`: in-memory adapters for local iteration
+- `src/deal_agent_platform/workflows/`: Temporal-like workflow facade
+
+Run demo:
+
+```bash
+cd /Users/infantjerin/Projects/git/coding-agent-doc
+PYTHONPATH=src python3 -m deal_agent_platform.demo
+```
+
 https://deepwiki.com/openclaw/openclaw/1-overview

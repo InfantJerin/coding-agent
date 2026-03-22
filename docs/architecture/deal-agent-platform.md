@@ -4,13 +4,15 @@
 
 ### 1.1 Purpose
 
-A context-scoped agentic platform that monitors business activity across an enterprise ecosystem — email, document repositories, application logs, transactional systems — and autonomously extracts information, detects discrepancies, runs computations, and takes action within defined approval boundaries.
+A context-scoped **agent runtime** — the operating environment that gives AI agents the memory, event awareness, policy guardrails, and approval gates they need to autonomously operate across a deal's lifecycle.
+
+The LLM (Claude) is the reasoning engine. This platform is everything else: the Channel Bridge watches for events, Temporal provides durable orchestration, S3 holds per-context memory, OPA enforces policy, and the Approval Gateway gets human sign-off. **Claude can reason about a deal; this runtime lets it _operate_ on a deal autonomously, durably, and safely at scale.**
 
 Each **context** (a deal, a compliance review, a counterparty relationship) gets its own agent that:
 - Observes events from multiple channels tagged with its context ID
-- Reads and extracts terms from incoming documents
+- Reads and extracts terms from incoming documents, accumulating fields toward readiness gates
 - Queries transactional systems for current state
-- Runs calculations (risk, exposure, compliance checks)
+- Runs calculations (risk, exposure, compliance checks) when gates are satisfied
 - Communicates progress and requests approvals from humans
 - Writes structured outcomes back to transactional systems
 

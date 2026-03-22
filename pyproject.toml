@@ -22,11 +22,12 @@ py-modules = ["main", "env_loader"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["agent_core*", "profiles*", "tools*", "llm*", "schemas*"]
+include = ["agent_core*", "profiles*", "tools*", "llm*", "schemas*", "deal_agent_platform*"]
 
 [tool.setuptools.package-data]
 agent_core = ["*.yaml"]
 schemas = ["finance/*.yaml"]
+deal_agent_platform = ["policy/policies/*.rego"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
