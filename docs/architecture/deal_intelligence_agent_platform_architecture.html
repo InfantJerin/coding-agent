@@ -1,0 +1,437 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.arch { font-family: var(--font-sans); padding: 12px 0; }
+.tier { margin-bottom: 2px; position: relative; }
+.tier-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  padding: 0 0 6px 8px;
+}
+.tier-box {
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--color-background-secondary);
+  position: relative;
+}
+.tier-box.outer {
+  border: 1.5px solid var(--color-border-secondary);
+  background: transparent;
+}
+.row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.row + .row { margin-top: 8px; }
+.svc {
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--color-background-primary);
+  text-align: center;
+  flex: 1 1 0;
+  min-width: 100px;
+  max-width: 170px;
+  cursor: default;
+  transition: border-color 0.15s;
+}
+.svc:hover { border-color: var(--color-border-primary); }
+.svc-icon {
+  font-size: 18px;
+  margin-bottom: 3px;
+  display: block;
+}
+.svc-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+.svc-desc {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+.svc.accent-blue { border-left: 3px solid #378ADD; }
+.svc.accent-teal { border-left: 3px solid #1D9E75; }
+.svc.accent-amber { border-left: 3px solid #EF9F27; }
+.svc.accent-purple { border-left: 3px solid #7F77DD; }
+.svc.accent-coral { border-left: 3px solid #D85A30; }
+.svc.accent-green { border-left: 3px solid #639922; }
+.svc.accent-pink { border-left: 3px solid #D4537E; }
+.svc.accent-red { border-left: 3px solid #E24B4A; }
+.svc.wide { max-width: 100%; flex: 1 1 100%; }
+
+.conn-line {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 28px;
+  position: relative;
+}
+.conn-line::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--color-border-secondary);
+}
+.conn-label {
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: 10px;
+  padding: 2px 10px;
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.inner-group {
+  border: 1px dashed var(--color-border-tertiary);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.inner-group:last-child { margin-bottom: 0; }
+.inner-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+.wf-items { display: flex; gap: 6px; flex-wrap: wrap; }
+.wf-tag {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--color-background-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-tertiary);
+  white-space: nowrap;
+}
+.wf-tag.active { color: #1D9E75; border-color: #1D9E75; background: #E1F5EE; }
+.wf-tag.waiting { color: #BA7517; border-color: #BA7517; background: #FAEEDA; }
+.wf-tag.approval { color: #D4537E; border-color: #D4537E; background: #FBEAF0; }
+
+@media (prefers-color-scheme: dark) {
+  .wf-tag.active { color: #5DCAA5; border-color: #0F6E56; background: #08504120; }
+  .wf-tag.waiting { color: #FAC775; border-color: #854F0B; background: #41240220; }
+  .wf-tag.approval { color: #ED93B1; border-color: #72243E; background: #4B152820; }
+}
+.fan-arrows {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  height: 20px;
+  position: relative;
+}
+.fan-arrows::before, .fan-arrows::after, .fan-arrows span::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 1.5px;
+  height: 100%;
+  background: var(--color-border-secondary);
+}
+.fan-arrows::before { left: 30%; }
+.fan-arrows::after { left: 50%; }
+.fan-arrows span::before { left: 70%; }
+.side-row { display: flex; gap: 8px; }
+.side-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+</style>
+
+<div class="arch">
+
+  <div class="tier-label">External event sources</div>
+  <div class="tier">
+    <div class="tier-box">
+      <div class="row">
+        <div class="svc accent-blue">
+          <span class="svc-name">SharePoint</span>
+          <span class="svc-desc">Document uploads</span>
+        </div>
+        <div class="svc accent-blue">
+          <span class="svc-name">Email</span>
+          <span class="svc-desc">Service mailbox</span>
+        </div>
+        <div class="svc accent-blue">
+          <span class="svc-name">Lockbox (SFTP)</span>
+          <span class="svc-desc">BAI2 files</span>
+        </div>
+        <div class="svc accent-blue">
+          <span class="svc-name">ClearPar (SFTP)</span>
+          <span class="svc-desc">Trade packs</span>
+        </div>
+        <div class="svc accent-blue">
+          <span class="svc-name">BQL stream</span>
+          <span class="svc-desc">App event logs</span>
+        </div>
+        <div class="svc accent-blue">
+          <span class="svc-name">Manual / API</span>
+          <span class="svc-desc">UI forms, callbacks</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn-line"><span class="conn-label">Webhooks / SFTP poll / API calls</span></div>
+
+  <div class="tier-label">Ingestion layer</div>
+  <div class="tier">
+    <div class="tier-box" style="border-color: #378ADD55;">
+      <div class="section-title" style="color:#378ADD;">Channel bridge</div>
+      <div class="row">
+        <div class="svc accent-teal">
+          <span class="svc-name">Power Automate adapters</span>
+          <span class="svc-desc">SharePoint + Email triggers via MS Graph</span>
+        </div>
+        <div class="svc accent-teal">
+          <span class="svc-name">SFTP watcher</span>
+          <span class="svc-desc">Temporal scheduled workflow, 15m poll</span>
+        </div>
+        <div class="svc accent-teal">
+          <span class="svc-name">BQL consumer</span>
+          <span class="svc-desc">Temporal scheduled workflow</span>
+        </div>
+        <div class="svc accent-teal">
+          <span class="svc-name">API trigger</span>
+          <span class="svc-desc">HTTP endpoint</span>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="row">
+          <div class="svc accent-purple" style="max-width:220px;">
+            <span class="svc-name">Context ID resolver</span>
+            <span class="svc-desc">Tier 1: path mapping &rarr; Tier 2: content extraction &rarr; Tier 3: human routing</span>
+          </div>
+          <div class="svc accent-purple" style="max-width:220px;">
+            <span class="svc-name">Event normalizer</span>
+            <span class="svc-desc">Unified event envelope with context_id, type, source, payload</span>
+          </div>
+          <div class="svc accent-purple" style="max-width:220px;">
+            <span class="svc-name">Signal dispatch</span>
+            <span class="svc-desc">temporal_client.signal(workflow_id, on_event)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn-line"><span class="conn-label">Temporal signals (on_event)</span></div>
+
+  <div class="tier-label">Orchestration layer</div>
+  <div class="tier">
+    <div class="tier-box outer" style="border-color: #7F77DD88;">
+      <div class="section-title" style="color:#7F77DD;">Temporal server</div>
+
+      <div class="inner-group">
+        <div class="inner-label">Deal agent workflows (one per context_id)</div>
+        <div class="wf-items">
+          <span class="wf-tag active">deal-abc-2026 &bull; processing</span>
+          <span class="wf-tag waiting">deal-xyz-2026 &bull; waiting</span>
+          <span class="wf-tag approval">deal-pqr-2026 &bull; approval</span>
+          <span class="wf-tag waiting">deal-mno-2026 &bull; waiting</span>
+        </div>
+        <div style="margin-top:8px;">
+          <div class="row" style="justify-content:flex-start; gap:12px; flex-wrap:wrap;">
+            <span class="wf-tag" style="font-size:9px;">Workflow ID = context_id</span>
+            <span class="wf-tag" style="font-size:9px;">Events via signals</span>
+            <span class="wf-tag" style="font-size:9px;">Tools via activities</span>
+            <span class="wf-tag" style="font-size:9px;">wait_condition (zero compute)</span>
+            <span class="wf-tag" style="font-size:9px;">continue_as_new</span>
+            <span class="wf-tag" style="font-size:9px;">Queryable state</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="inner-group">
+        <div class="inner-label">Task queue: "deal-agent-tasks"</div>
+        <div class="row">
+          <div class="svc accent-amber" style="min-width:80px;">
+            <span class="svc-name">Worker 1</span>
+            <span class="svc-desc">Stateless activity executor</span>
+          </div>
+          <div class="svc accent-amber" style="min-width:80px;">
+            <span class="svc-name">Worker 2</span>
+            <span class="svc-desc">Stateless activity executor</span>
+          </div>
+          <div class="svc accent-amber" style="min-width:80px;">
+            <span class="svc-name">Worker N</span>
+            <span class="svc-desc">Autoscale pool</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="inner-group">
+        <div class="inner-label">Agent roles (execute as activities)</div>
+        <div class="row">
+          <div class="svc accent-coral" style="min-width:80px;">
+            <span class="svc-name">Analyst</span>
+            <span class="svc-desc">Document term extraction via LLM</span>
+          </div>
+          <div class="svc accent-coral" style="min-width:80px;">
+            <span class="svc-name">Observer</span>
+            <span class="svc-desc">Readiness gate evaluation</span>
+          </div>
+          <div class="svc accent-coral" style="min-width:80px;">
+            <span class="svc-name">Calculator</span>
+            <span class="svc-desc">Sandboxed computation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fan-arrows"><span></span></div>
+
+  <div class="tier-label">Data and policy layer</div>
+  <div class="tier">
+    <div class="side-row">
+      <div class="side-col">
+        <div class="tier-box">
+          <div class="row" style="flex-direction:column; gap:6px;">
+            <div class="svc accent-green" style="max-width:100%;">
+              <span class="svc-name">S3 &mdash; Agent memory</span>
+              <span class="svc-desc">MEMORY.md, events.jsonl, state.json, extracted_terms.json, context.yaml, audit/decisions.jsonl</span>
+            </div>
+            <div class="svc accent-green" style="max-width:100%;">
+              <span class="svc-name">OpenSearch</span>
+              <span class="svc-desc">Document index, full-text search by context_id</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-col">
+        <div class="tier-box">
+          <div class="row" style="flex-direction:column; gap:6px;">
+            <div class="svc accent-green" style="max-width:100%;">
+              <span class="svc-name">Transactional DB (Postgres)</span>
+              <span class="svc-desc">Positions, compliance, risk metrics, CapEx, deal status, context index</span>
+            </div>
+            <div class="svc accent-green" style="max-width:100%;">
+              <span class="svc-name">Context registry</span>
+              <span class="svc-desc">context.yaml per deal &mdash; sources, gates, policies</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:8px;"></div>
+
+  <div class="tier-label">Security and policy</div>
+  <div class="tier">
+    <div class="tier-box" style="border-color: #E24B4A55;">
+      <div class="section-title" style="color:#E24B4A;">OPA policy engine</div>
+      <div class="row">
+        <div class="svc accent-red" style="min-width:110px;">
+          <span class="svc-name">Tool allowlist</span>
+          <span class="svc-desc">Per-context permitted tools</span>
+        </div>
+        <div class="svc accent-red" style="min-width:110px;">
+          <span class="svc-name">Context boundary</span>
+          <span class="svc-desc">Enforce context_id scope</span>
+        </div>
+        <div class="svc accent-red" style="min-width:110px;">
+          <span class="svc-name">Data scope</span>
+          <span class="svc-desc">Field-level access control</span>
+        </div>
+        <div class="svc accent-red" style="min-width:110px;">
+          <span class="svc-name">Approval tier</span>
+          <span class="svc-desc">auto / single / maker-checker / four-eyes</span>
+        </div>
+      </div>
+      <div style="margin-top:6px;">
+        <div class="row" style="justify-content:center;">
+          <span class="wf-tag" style="font-size:9px;">Hybrid: YAML data + Rego logic</span>
+          <span class="wf-tag" style="font-size:9px;">Evaluates every activity before execution</span>
+          <span class="wf-tag" style="font-size:9px;">Decision logging for audit</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:8px;"></div>
+
+  <div class="tier-label">Outbound and compute</div>
+  <div class="tier">
+    <div class="side-row">
+      <div class="side-col">
+        <div class="tier-box">
+          <div class="section-title" style="color:#D4537E;">Human interaction</div>
+          <div class="svc accent-pink" style="max-width:100%;">
+            <span class="svc-name">Teams bot</span>
+            <span class="svc-desc">Progress updates via Adaptive Cards, approval requests &rarr; Signal back to workflow</span>
+          </div>
+          <div style="margin-top:6px;">
+            <div class="svc accent-pink" style="max-width:100%;">
+              <span class="svc-name">Approval gateway</span>
+              <span class="svc-desc">Post card &rarr; wait_condition &rarr; resume on signal or timeout &rarr; escalate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-col">
+        <div class="tier-box">
+          <div class="section-title" style="color:#D85A30;">Compute</div>
+          <div class="svc accent-coral" style="max-width:100%;">
+            <span class="svc-name">LLM provider</span>
+            <span class="svc-desc">Claude / OpenAI &mdash; extraction, reasoning, analysis</span>
+          </div>
+          <div style="margin-top:6px;">
+            <div class="svc accent-coral" style="max-width:100%;">
+              <span class="svc-name">Sandbox (Docker / K8s)</span>
+              <span class="svc-desc">Isolated Python execution, no network, read-only data mount, timeout + mem limit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:8px;"></div>
+
+  <div class="tier-label">Audit trail</div>
+  <div class="tier">
+    <div class="tier-box" style="background:var(--color-background-tertiary);">
+      <div class="row">
+        <div class="svc" style="border-left:3px solid var(--color-text-tertiary); min-width:90px;">
+          <span class="svc-name">S3 events.jsonl</span>
+          <span class="svc-desc">Agent perspective</span>
+        </div>
+        <div class="svc" style="border-left:3px solid var(--color-text-tertiary); min-width:90px;">
+          <span class="svc-name">S3 audit/decisions</span>
+          <span class="svc-desc">Reasoning log</span>
+        </div>
+        <div class="svc" style="border-left:3px solid var(--color-text-tertiary); min-width:90px;">
+          <span class="svc-name">Transactional DB</span>
+          <span class="svc-desc">Business outcomes</span>
+        </div>
+        <div class="svc" style="border-left:3px solid var(--color-text-tertiary); min-width:90px;">
+          <span class="svc-name">OPA decision log</span>
+          <span class="svc-desc">Allow/deny record</span>
+        </div>
+        <div class="svc" style="border-left:3px solid var(--color-text-tertiary); min-width:90px;">
+          <span class="svc-name">Temporal history</span>
+          <span class="svc-desc">Execution trace</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

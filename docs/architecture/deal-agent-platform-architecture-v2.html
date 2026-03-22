@@ -1,0 +1,266 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);padding:12px 0}
+.arch{max-width:740px;margin:0 auto}
+.tier{margin-bottom:2px}
+.tier-label{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-tertiary,#888);padding:0 0 5px 8px}
+.tier-box{border:1px solid var(--color-border-tertiary,#e0e0e0);border-radius:10px;padding:13px;background:var(--color-background-secondary,#fafafa)}
+.tier-box.outer{border:1.5px solid var(--color-border-secondary,#ccc);background:transparent}
+.row{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+.row+.row{margin-top:7px}
+.svc{border:1px solid var(--color-border-tertiary,#e0e0e0);border-radius:8px;padding:7px 9px;background:var(--color-background-primary,#fff);text-align:center;flex:1 1 0;min-width:90px;max-width:170px;transition:border-color .15s}
+.svc:hover{border-color:var(--color-border-primary,#aaa)}
+.svc-name{font-size:11.5px;font-weight:500;color:var(--color-text-primary,#1a1a1a);line-height:1.3}
+.svc-desc{font-size:9.5px;color:var(--color-text-secondary,#666);margin-top:2px;line-height:1.3}
+.accent-blue{border-left:3px solid #378ADD;border-radius:0}
+.accent-teal{border-left:3px solid #1D9E75;border-radius:0}
+.accent-amber{border-left:3px solid #EF9F27;border-radius:0}
+.accent-purple{border-left:3px solid #7F77DD;border-radius:0}
+.accent-coral{border-left:3px solid #D85A30;border-radius:0}
+.accent-green{border-left:3px solid #639922;border-radius:0}
+.accent-pink{border-left:3px solid #D4537E;border-radius:0}
+.accent-red{border-left:3px solid #E24B4A;border-radius:0}
+.conn{display:flex;justify-content:center;align-items:center;height:26px;position:relative}
+.conn::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1.5px;background:var(--color-border-secondary,#ccc)}
+.conn-tag{background:var(--color-background-primary,#fff);border:1px solid var(--color-border-tertiary,#e0e0e0);border-radius:10px;padding:2px 10px;font-size:9.5px;color:var(--color-text-secondary,#666);position:relative;z-index:1;white-space:nowrap}
+.section-title{font-size:12px;font-weight:500;color:var(--color-text-primary,#1a1a1a);margin-bottom:7px;padding-left:4px}
+.inner-group{border:1px dashed var(--color-border-tertiary,#ddd);border-radius:8px;padding:9px;margin-bottom:7px}
+.inner-group:last-child{margin-bottom:0}
+.inner-label{font-size:9.5px;font-weight:500;color:var(--color-text-secondary,#666);margin-bottom:5px;padding-left:2px}
+.tag-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.tag{font-size:9px;padding:2px 7px;border-radius:5px;background:var(--color-background-tertiary,#f0f0f0);color:var(--color-text-secondary,#666);border:1px solid var(--color-border-tertiary,#e0e0e0);white-space:nowrap}
+.tag.new{color:#1D9E75;border-color:#1D9E75;background:#E1F5EE}
+.tag.changed{color:#D85A30;border-color:#D85A30;background:#FAECE7}
+.tag.lifecycle{color:#534AB7;border-color:#534AB7;background:#EEEDFE}
+@media(prefers-color-scheme:dark){
+.tag.new{color:#5DCAA5;border-color:#0F6E56;background:#08504120}
+.tag.changed{color:#F0997B;border-color:#993C1D;background:#4A1B0C20}
+.tag.lifecycle{color:#AFA9EC;border-color:#3C3489;background:#26215C20}
+}
+.side-row{display:flex;gap:7px}
+.side-col{flex:1;display:flex;flex-direction:column;gap:7px}
+.layer-badge{display:inline-block;font-size:9px;font-weight:500;padding:1px 6px;border-radius:4px;margin-right:4px;vertical-align:middle}
+.layer-a{background:#E6F1FB;color:#0C447C;border:1px solid #85B7EB}
+.layer-b{background:#EEEDFE;color:#3C3489;border:1px solid #AFA9EC}
+.layer-c{background:#FAEEDA;color:#633806;border:1px solid #FAC775}
+.layer-d{background:#E1F5EE;color:#085041;border:1px solid #5DCAA5}
+@media(prefers-color-scheme:dark){
+.layer-a{background:#042C5340;color:#85B7EB;border-color:#185FA5}
+.layer-b{background:#26215C40;color:#CECBF6;border-color:#534AB7}
+.layer-c{background:#41240240;color:#FAC775;border-color:#854F0B}
+.layer-d{background:#04342C40;color:#9FE1CB;border-color:#0F6E56}
+}
+</style>
+
+<div class="arch">
+
+<div class="tier-label">External event sources</div>
+<div class="tier">
+<div class="tier-box">
+<div class="row">
+<div class="svc accent-blue"><div class="svc-name">SharePoint</div><div class="svc-desc">Document uploads</div></div>
+<div class="svc accent-blue"><div class="svc-name">Email</div><div class="svc-desc">Service mailbox</div></div>
+<div class="svc accent-blue"><div class="svc-name">Lockbox (SFTP)</div><div class="svc-desc">BAI2 files</div></div>
+<div class="svc accent-blue"><div class="svc-name">ClearPar (SFTP)</div><div class="svc-desc">Trade packs</div></div>
+<div class="svc accent-blue"><div class="svc-name">BQL stream</div><div class="svc-desc">App event logs</div></div>
+<div class="svc accent-blue"><div class="svc-name">Manual / API</div><div class="svc-desc">UI forms, callbacks</div></div>
+</div>
+</div>
+</div>
+
+<div class="conn"><span class="conn-tag">Webhooks / SFTP poll / API calls</span></div>
+
+<div class="tier-label">Ingestion layer</div>
+<div class="tier">
+<div class="tier-box" style="border-color:#378ADD55">
+<div class="section-title" style="color:#378ADD">Channel bridge</div>
+<div class="row">
+<div class="svc accent-teal"><div class="svc-name">Power Automate adapters</div><div class="svc-desc">SharePoint + Email triggers</div></div>
+<div class="svc accent-teal"><div class="svc-name">SFTP watcher</div><div class="svc-desc">Temporal scheduled, 15m poll</div></div>
+<div class="svc accent-teal"><div class="svc-name">BQL consumer</div><div class="svc-desc">Temporal scheduled</div></div>
+<div class="svc accent-teal"><div class="svc-name">API trigger</div><div class="svc-desc">HTTP endpoint</div></div>
+</div>
+<div style="margin-top:8px">
+<div class="row">
+<div class="svc accent-purple" style="max-width:200px"><div class="svc-name">Context ID resolver</div><div class="svc-desc">Deterministic: path, alias, subject pattern, account mapping</div></div>
+<div class="svc accent-purple" style="max-width:200px">
+<div class="svc-name">Dedupe pipeline</div>
+<div class="svc-desc">Event ID + content hash + version lineage</div>
+<div class="tag-row"><span class="tag new">new</span></div>
+</div>
+<div class="svc accent-purple" style="max-width:200px"><div class="svc-name">Signal dispatch</div><div class="svc-desc">temporal.signal(workflow_id, on_event)</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="conn"><span class="conn-tag">Temporal signals (on_event) — deduplicated, context-resolved</span></div>
+
+<div class="tier-label">Orchestration layer</div>
+<div class="tier">
+<div class="tier-box outer" style="border-color:#7F77DD88">
+<div class="section-title" style="color:#7F77DD">Temporal server — Deal agent workflow (one per context_id)</div>
+
+<div class="inner-group">
+<div class="inner-label">Signal + query handlers</div>
+<div class="row">
+<div class="svc accent-purple" style="max-width:220px"><div class="svc-name">Signal handlers</div><div class="svc-desc">on_event, on_approval_response</div></div>
+<div class="svc accent-purple" style="max-width:220px"><div class="svc-name">Query handlers</div><div class="svc-desc">get_status (dashboard, no wake)</div></div>
+<div class="svc accent-purple" style="max-width:220px">
+<div class="svc-name">Event classifier</div>
+<div class="svc-desc">Route: incremental / replacement / query / scheduled</div>
+<div class="tag-row"><span class="tag new">new</span></div>
+</div>
+</div>
+</div>
+
+<div class="inner-group">
+<div class="inner-label">Main loop — extract → evaluate → act (sequential phases, not separate agents)</div>
+<div class="row">
+<div class="svc accent-coral"><div class="svc-name">Extract phase</div><div class="svc-desc">LLM term extraction with provenance</div><div class="tag-row"><span class="tag changed">changed</span></div></div>
+<div class="svc accent-coral"><div class="svc-name">Evaluate phase</div><div class="svc-desc">Strengthened readiness gates</div><div class="tag-row"><span class="tag changed">changed</span></div></div>
+<div class="svc accent-coral"><div class="svc-name">Act phase</div><div class="svc-desc">Sandboxed compute, state updates</div></div>
+</div>
+<div style="margin-top:8px">
+<div class="inner-group" style="border-color:#534AB755">
+<div class="inner-label">Fact lifecycle (per extracted field) <span class="tag lifecycle">new model</span></div>
+<div class="tag-row" style="justify-content:center">
+<span class="tag lifecycle">observed</span>
+<span style="color:var(--color-text-tertiary)">→</span>
+<span class="tag lifecycle">extracted</span>
+<span style="color:var(--color-text-tertiary)">→</span>
+<span class="tag lifecycle">candidate</span>
+<span style="color:var(--color-text-tertiary)">→</span>
+<span class="tag lifecycle">conflicted?</span>
+<span style="color:var(--color-text-tertiary)">→</span>
+<span class="tag lifecycle">approved</span>
+<span style="color:var(--color-text-tertiary)">→</span>
+<span class="tag lifecycle">committed</span>
+<span style="color:var(--color-text-tertiary)">|</span>
+<span class="tag lifecycle">superseded</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="inner-group">
+<div class="inner-label">Approval gateway <span class="tag changed">changed: decision bundles</span></div>
+<div class="row">
+<div class="svc accent-pink" style="max-width:300px"><div class="svc-name">Decision bundle approvals</div><div class="svc-desc">Group related state updates into one approval card, not per-tool-call</div></div>
+<div class="svc accent-pink" style="max-width:300px"><div class="svc-name">Conflict resolution</div><div class="svc-desc">Source priority + version-aware supersession + human review for conflicts</div><div class="tag-row"><span class="tag new">new</span></div></div>
+</div>
+</div>
+
+<div class="inner-group">
+<div class="inner-label">Task queue: deal-agent-tasks → worker pool</div>
+<div class="row">
+<div class="svc accent-amber"><div class="svc-name">Worker pool (stateless, autoscale 2→50)</div><div class="svc-desc">Any worker executes any activity — each checked by OPA</div></div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="conn"><span class="conn-tag">Activities fan out to four system layers</span></div>
+
+<div class="tier-label">System layers (A → D: raw evidence to committed state)</div>
+<div class="tier">
+<div class="tier-box">
+
+<div class="inner-group">
+<div class="inner-label"><span class="layer-badge layer-a">Layer A</span> Raw evidence — documents, emails, event payloads, system snapshots</div>
+<div class="row">
+<div class="svc accent-green"><div class="svc-name">OpenSearch</div><div class="svc-desc">Document index, full-text search, scoped by context_id</div></div>
+<div class="svc accent-green"><div class="svc-name">S3 — raw artifacts</div><div class="svc-desc">Original documents, emails, attachments preserved</div></div>
+<div class="svc accent-green"><div class="svc-name">BQL (read-only)</div><div class="svc-desc">Application event stream</div></div>
+</div>
+</div>
+
+<div class="inner-group">
+<div class="inner-label"><span class="layer-badge layer-b">Layer B</span> Fact ledger — versioned extracted facts with provenance <span class="tag new">new</span></div>
+<div class="row">
+<div class="svc accent-purple" style="max-width:100%">
+<div class="svc-name">Fact ledger (S3 / Postgres)</div>
+<div class="svc-desc">Each fact: field, value, source, source_version, confidence, status, observed_at, approved_by, committed_at. Append-only. Never overwritten — superseded facts retain history.</div>
+</div>
+</div>
+<div style="margin-top:6px">
+<div class="row">
+<div class="svc accent-purple" style="max-width:220px"><div class="svc-name">Document lineage</div><div class="svc-desc">Draft → final → amendment chain per artifact</div><div class="tag-row"><span class="tag new">new</span></div></div>
+<div class="svc accent-purple" style="max-width:220px"><div class="svc-name">Document precedence</div><div class="svc-desc">Credit agreement > amendment > term sheet > notice</div><div class="tag-row"><span class="tag new">new</span></div></div>
+</div>
+</div>
+</div>
+
+<div class="inner-group">
+<div class="inner-label"><span class="layer-badge layer-c">Layer C</span> Working context state — best candidates, conflicts, pending approvals, gate status <span class="tag changed">changed</span></div>
+<div class="row">
+<div class="svc accent-amber"><div class="svc-name">S3 — agent memory</div><div class="svc-desc">MEMORY.md, state.json, gate_status.json, events.jsonl, audit/decisions.jsonl</div></div>
+<div class="svc accent-amber" style="max-width:220px">
+<div class="svc-name">Strengthened gates</div>
+<div class="svc-desc">Present + not conflicted + fresh enough + source quality + approval-cleared</div>
+<div class="tag-row"><span class="tag changed">changed</span></div>
+</div>
+</div>
+</div>
+
+<div class="inner-group">
+<div class="inner-label"><span class="layer-badge layer-d">Layer D</span> Committed business state — approved / promoted, written to systems of record <span class="tag changed">changed</span></div>
+<div class="row">
+<div class="svc accent-green"><div class="svc-name">Transactional DB (Postgres)</div><div class="svc-desc">Positions, compliance, risk metrics, CapEx, deal status, context index — only promotion-approved data</div></div>
+</div>
+<div style="margin-top:4px">
+<div class="tag-row" style="justify-content:center">
+<span class="tag" style="font-size:8px">Memory is where the agent thinks</span>
+<span style="color:var(--color-text-tertiary)">|</span>
+<span class="tag" style="font-size:8px">Business state is where the firm acts</span>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div style="height:8px"></div>
+
+<div class="tier-label">Security, policy, and compute</div>
+<div class="tier">
+<div class="side-row">
+<div class="side-col">
+<div class="tier-box" style="border-color:#E24B4A55">
+<div class="section-title" style="color:#E24B4A">OPA policy engine (dumb bouncer)</div>
+<div class="row" style="flex-direction:column;gap:5px">
+<div class="svc accent-red" style="max-width:100%"><div class="svc-name">4-check pipeline</div><div class="svc-desc">Tool allowlist → context boundary → data scope → approval tier</div></div>
+<div class="svc accent-red" style="max-width:100%"><div class="svc-name">Enforcement boundary</div><div class="svc-desc">Deterministic only. No LLM reasoning. Flat allowlist per context. Human-edited YAML, engineer-written Rego.</div><div class="tag-row"><span class="tag" style="font-size:8px">Policy = wall, not suggestion</span></div></div>
+</div>
+</div>
+</div>
+<div class="side-col">
+<div class="tier-box">
+<div class="section-title" style="color:#D4537E">Outbound + compute</div>
+<div class="row" style="flex-direction:column;gap:5px">
+<div class="svc accent-pink" style="max-width:100%"><div class="svc-name">Teams bot</div><div class="svc-desc">Decision bundle cards + approval signals</div></div>
+<div class="svc accent-coral" style="max-width:100%"><div class="svc-name">LLM provider</div><div class="svc-desc">Claude / OpenAI — extraction + reasoning</div></div>
+<div class="svc accent-coral" style="max-width:100%"><div class="svc-name">Sandbox (Docker/K8s)</div><div class="svc-desc">No network, read-only mount, 5min/2GB</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="height:8px"></div>
+
+<div class="tier-label">Audit trail (5 destinations)</div>
+<div class="tier">
+<div class="tier-box" style="background:var(--color-background-tertiary,#f5f5f5)">
+<div class="row">
+<div class="svc" style="border-left:2px solid var(--color-text-tertiary,#999);border-radius:0"><div class="svc-name">S3 events.jsonl</div><div class="svc-desc">Agent perspective</div></div>
+<div class="svc" style="border-left:2px solid var(--color-text-tertiary,#999);border-radius:0"><div class="svc-name">S3 audit/decisions</div><div class="svc-desc">Reasoning log</div></div>
+<div class="svc" style="border-left:2px solid var(--color-text-tertiary,#999);border-radius:0"><div class="svc-name">Fact ledger</div><div class="svc-desc">Full provenance history</div><div class="tag-row"><span class="tag new">new</span></div></div>
+<div class="svc" style="border-left:2px solid var(--color-text-tertiary,#999);border-radius:0"><div class="svc-name">OPA decision log</div><div class="svc-desc">Allow / deny record</div></div>
+<div class="svc" style="border-left:2px solid var(--color-text-tertiary,#999);border-radius:0"><div class="svc-name">Temporal history</div><div class="svc-desc">Execution trace</div></div>
+</div>
+</div>
+</div>
+
+</div>
