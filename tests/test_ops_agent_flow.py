@@ -1,7 +1,9 @@
 import unittest
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from agent_core.models import TaskRequest
 from agent_core.runner import GenericHeadlessAgent
 from profiles.finance_docs import build_finance_docs_profile
 
@@ -47,6 +49,27 @@ class OpsAgentFlowTests(unittest.TestCase):
             self.assertTrue(build_map_calls)
             args = build_map_calls[0].get("args", {})
             self.assertEqual(args.get("parse_strategy"), "generic")
+
+    def test_run_writes_extraction_payload_to_json_artifact(self) -> None:
+        profile = build_finance_docs_profile()
+        runner = GenericHeadlessAgent(profile.registry, profile.policy)
+        with TemporaryDirectory() as tmp:
+            result = runner.run(
+                task=TaskRequest(
+                    instruction="Extract key financial and covenant terms from this agreement.",
+                    documents=[Path("examples/sample_credit_agreement.txt")],
+                    questions=["What is the maturity date?"],
+                    output_modes=["json"],
+                    metadata={"document_type": "credit_agreement"},
+                ),
+                output_dir=Path(tmp),
+            )
+            self.assertTrue(result.success)
+
+            extraction = json.loads((Path(tmp) / "extraction.json").read_text())
+            self.assertEqual(extraction["document_type"], "credit_agreement")
+            self.assertIn("field_extraction", extraction)
+            self.assertIn("graph_extraction", extraction)
 
 
 if __name__ == "__main__":

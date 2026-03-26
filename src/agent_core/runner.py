@@ -397,22 +397,7 @@ class GenericHeadlessAgent:
 
         if "json" in task.output_modes:
             json_path = output_dir / "extraction.json"
-            payload = {
-                "extraction": extraction,
-                "qa": answers,
-                "reading_trail": state.get("reading_trail", []),
-                "open_questions": state.get("open_questions", []),
-                "warnings": extraction.get("consistency", {}).get("warnings", []),
-                "session": asdict(session),
-                "memory_hits": memory_store.query(" ".join(task.questions), top_k=10),
-                "strategy": {"name": strategy.name, "parse_strategy": strategy.parse_strategy, "run_steps": strategy.run_steps},
-                "doc_map_summary": {
-                    "sections": len(doc_map.get("sections", [])),
-                    "definitions": len(doc_map.get("definitions", [])),
-                    "xrefs": len(doc_map.get("xrefs", [])),
-                },
-            }
-            json_path.write_text(json.dumps(payload, indent=2))
+            json_path.write_text(json.dumps(extraction, indent=2))
             artifacts.append(RunArtifact(name="json", path=json_path))
 
         run_info_path = output_dir / "run_result.json"
