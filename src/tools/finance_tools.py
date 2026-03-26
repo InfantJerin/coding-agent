@@ -24,11 +24,269 @@ def _safe_parse_json(raw: str) -> dict[str, Any] | None:
     return None
 
 
+GRAPH_OPERATOR_TYPES = {
+    "LOOKUP",
+    "ARITHMETIC",
+    "CONDITIONAL",
+    "COMPARE",
+    "MIN",
+    "MAX",
+    "FLOOR",
+    "CAP",
+    "DATE_GATE",
+    "BOOLEAN_AND",
+    "BOOLEAN_OR",
+    "REFERENCE",
+    "AGGREGATE",
+    "CONSTANT",
+    "RATE_CALC",
+}
+
+
+def _to_snake_case(value: str) -> str:
+    cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", value.strip().lower())
+    return re.sub(r"_+", "_", cleaned).strip("_")
+
+
+def _parse_percent_value(raw: str) -> float | None:
+    match = re.search(r"(\d+(?:\.\d+)?)\s*%", raw)
+    if not match:
+        return None
+    return float(match.group(1))
+
+
+def _pct_to_bps(raw: str) -> int | None:
+    pct = _parse_percent_value(raw)
+    if pct is None:
+        return None
+    return int(round(pct * 100))
+
+
+def _parse_money_to_number(raw: str) -> int | None:
+    match = re.search(r"\$\s?([\d,]+(?:\.\d+)?)\s*(million|billion|m|bn)?", raw, re.IGNORECASE)
+    if not match:
+        return None
+    amount = float(match.group(1).replace(",", ""))
+    scale = (match.group(2) or "").lower()
+    if scale in {"million", "m"}:
+        amount *= 1_000_000
+    elif scale in {"billion", "bn"}:
+        amount *= 1_000_000_000
+    return int(amount)
+
+
+def _find_section_for_anchor(doc_map: dict[str, Any], anchor: str) -> dict[str, Any] | None:
+    anchor_row = doc_map.get("anchors", {}).get(anchor)
+    if not anchor_row:
+        return None
+    doc_id = anchor_row.get("doc_id")
+    page = int(anchor_row.get("page", 0))
+    block = int(anchor_row.get("block", 0))
+    candidates: list[tuple[int, dict[str, Any]]] = []
+    for section in doc_map.get("sections", []):
+        if section.get("doc_id") != doc_id:
+            continue
+        if not (int(section.get("page_start", page)) <= page <= int(section.get("page_end", page))):
+            continue
+        distance = abs(block - int(section.get("block_start", block)))
+        candidates.append((distance, section))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda row: row[0])
+    return candidates[0][1]
+
+
+def _build_source(doc_map: dict[str, Any], anchor: str, fallback: str) -> str:
+    section = _find_section_for_anchor(doc_map, anchor)
+    if not section:
+        return fallback
+    section_no = section.get("section_no") or "unknown"
+    title = section.get("title") or "Untitled"
+    return f"Section {section_no} — {title}"
+
+
+class ExtractCreditAgreementGraphTool:
+    name = "extract_credit_agreement_graph"
+
+    def _deal_info(self, text: str) -> dict[str, Any]:
+        maturity_match = re.search(r'"Maturity Date"\s+means\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})', text)
+        borrower_match = re.search(r"\b([A-Z][A-Za-z0-9&.,' -]+?)\s+(?:as\s+)?Borrower\b", text)
+        total_commitment = _parse_money_to_number(text) or 0
+        return {
+            "borrower": borrower_match.group(1).strip() if borrower_match else "Borrower",
+            "facility_type": "revolving_credit" if "revolving" in text.lower() else "unknown",
+            "total_commitment": total_commitment,
+            "effective_date": None,
+            "maturity_date": maturity_match.group(1) if maturity_match else None,
+            "agent": None,
+            "amendment_history": [],
+        }
+
+    def _append_input_spec(
+        self,
+        input_specs: list[dict[str, Any]],
+        *,
+        param_id: str,
+        label: str,
+        source_type: str,
+        frequency: str,
+        unit: str,
+        description: str,
+        defined_in: str,
+        staleness_threshold_days: int | None,
+    ) -> None:
+        if any(row["param_id"] == param_id for row in input_specs):
+            return
+        input_specs.append(
+            {
+                "param_id": param_id,
+                "label": label,
+                "source_type": source_type,
+                "frequency": frequency,
+                "staleness_threshold_days": staleness_threshold_days,
+                "unit": unit,
+                "description": description,
+                "defined_in": defined_in,
+            }
+        )
+
+    def run(self, text: str, doc_map: dict[str, Any]) -> dict[str, Any]:
+        nodes: list[dict[str, Any]] = []
+        input_specs: list[dict[str, Any]] = []
+        edges: list[dict[str, str]] = []
+        low_confidence_nodes: list[str] = []
+        missing_references: list[str] = []
+        assumptions: list[str] = []
+
+        for definition in doc_map.get("definitions", []):
+            term = str(definition.get("term", ""))
+            definition_text = str(definition.get("text", ""))
+            term_snake = _to_snake_case(term)
+            source = _build_source(
+                doc_map=doc_map,
+                anchor=str(definition.get("anchor", "")),
+                fallback=f'Definition "{term}"',
+            )
+
+            if any(token in term.lower() for token in ("margin", "spread", "fee")):
+                bps = _pct_to_bps(definition_text)
+                if bps is None:
+                    continue
+                nodes.append(
+                    {
+                        "id": f"{term_snake}_bps",
+                        "type": "CONSTANT",
+                        "config": {"value": bps},
+                        "source": source,
+                        "output_unit": "bps",
+                        "notes": f'Parsed from definition text for "{term}".',
+                    }
+                )
+                continue
+
+            if "rate" in term.lower():
+                pct = _parse_percent_value(definition_text)
+                if pct is None:
+                    continue
+                nodes.append(
+                    {
+                        "id": f"{term_snake}_pct",
+                        "type": "CONSTANT",
+                        "config": {"value": round(pct / 100, 6)},
+                        "source": source,
+                        "output_unit": "pct",
+                        "notes": f'Parsed from definition text for "{term}".',
+                    }
+                )
+
+        for anchor, row in doc_map.get("anchors", {}).items():
+            line = str(row.get("text", ""))
+            lower = line.lower()
+            source = _build_source(doc_map=doc_map, anchor=anchor, fallback=line[:80])
+
+            if "interest rate" in lower and "plus applicable margin" in lower:
+                margin_node = next((node["id"] for node in nodes if node["id"] == "applicable_margin_bps"), None)
+                if not margin_node:
+                    assumptions.append("Skipped rate formula because Applicable Margin constant was not extracted.")
+                    continue
+                base_rate_param = "term_sofr_rate"
+                self._append_input_spec(
+                    input_specs,
+                    param_id=base_rate_param,
+                    label="Term SOFR Rate",
+                    source_type="Bloomberg",
+                    frequency="Daily",
+                    unit="pct",
+                    description="Observed benchmark base rate used for floating-rate loans.",
+                    defined_in=source,
+                    staleness_threshold_days=1,
+                )
+                rate_node_id = "revolving_loan_interest_rate"
+                nodes.append(
+                    {
+                        "id": rate_node_id,
+                        "type": "RATE_CALC",
+                        "config": {"base_rate": base_rate_param, "input": margin_node},
+                        "source": source,
+                        "output_unit": "pct",
+                        "notes": "Interest clause combines the floating benchmark with Applicable Margin.",
+                    }
+                )
+                edges.append({"from": margin_node, "to": rate_node_id})
+                continue
+
+            fee_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s+(?:per annum\s+)?commitment fee", line, re.IGNORECASE)
+            if fee_match:
+                node_id = "commitment_fee_bps"
+                nodes.append(
+                    {
+                        "id": node_id,
+                        "type": "CONSTANT",
+                        "config": {"value": int(round(float(fee_match.group(1)) * 100))},
+                        "source": source,
+                        "output_unit": "bps",
+                        "notes": "Commitment fee parsed directly from clause text.",
+                    }
+                )
+
+        xref_targets = {str(ref.get("target_text", "")).strip() for ref in doc_map.get("xrefs", [])}
+        for target in sorted(t for t in xref_targets if t):
+            resolved = any(str(ref.get("target_text", "")).strip() == target and ref.get("resolved_anchor") for ref in doc_map.get("xrefs", []))
+            if not resolved:
+                missing_references.append(target)
+
+        valid_nodes: list[dict[str, Any]] = []
+        seen_ids: set[str] = set()
+        for node in nodes:
+            if node["type"] not in GRAPH_OPERATOR_TYPES:
+                low_confidence_nodes.append(node["id"])
+                continue
+            if node["id"] in seen_ids:
+                continue
+            seen_ids.add(node["id"])
+            valid_nodes.append(node)
+
+        return {
+            "deal_info": self._deal_info(text),
+            "nodes": valid_nodes,
+            "input_specs": input_specs,
+            "edges": edges,
+            "extraction_metadata": {
+                "total_nodes": len(valid_nodes),
+                "total_inputs": len(input_specs),
+                "low_confidence_nodes": low_confidence_nodes,
+                "missing_references": missing_references,
+                "assumptions": assumptions,
+            },
+        }
+
+
 class ExtractFinanceSignalsTool:
     name = "extract_finance_signals"
 
     def __init__(self, llm_client: LLMClient | None = None) -> None:
         self.llm_client = llm_client
+        self.graph_tool = ExtractCreditAgreementGraphTool()
 
     _patterns = {
         "facility_amount": re.compile(r"\$\s?\d[\d,]*(?:\.\d+)?\s?(?:million|billion|m)?", re.IGNORECASE),
@@ -206,6 +464,8 @@ class ExtractFinanceSignalsTool:
         resolved_doc_type, schema = resolve_schema(document_type=doc_type, schema_path=schema_path)
         extraction["document_type"] = resolved_doc_type
         extraction["schema_version"] = schema["version"]
+        if resolved_doc_type == "credit_agreement" and doc_map:
+            extraction["graph_extraction"] = self.graph_tool.run(text=text, doc_map=doc_map)
 
         if not doc_map:
             extraction["structure_pass"] = {"section_families": {}}
@@ -432,6 +692,14 @@ class BuildSummaryReportTool:
             for field_name, row in extraction.get("field_extraction", {}).items():
                 value = row.get("value") or "Not found"
                 lines.append(f"- **{field_name}**: {value}")
+        graph = extraction.get("graph_extraction")
+        if isinstance(graph, dict) and graph.get("nodes"):
+            lines.append("")
+            lines.append("## Graph Extraction")
+            lines.append(f"- **nodes**: {graph.get('extraction_metadata', {}).get('total_nodes', 0)}")
+            lines.append(f"- **inputs**: {graph.get('extraction_metadata', {}).get('total_inputs', 0)}")
+            for node in graph.get("nodes", [])[:8]:
+                lines.append(f"- **{node.get('id')}** ({node.get('type')}): {node.get('source')}")
         lines.append("")
         lines.append("## Q&A")
         if qa:

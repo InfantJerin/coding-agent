@@ -34,6 +34,19 @@ class FinanceToolsTests(unittest.TestCase):
         self.assertIn("consistency", output)
         self.assertIn("warnings", output["consistency"])
         self.assertIn("unresolved_dependencies", output["field_extraction"]["facility_amount"])
+        self.assertIn("graph_extraction", output)
+        graph = output["graph_extraction"]
+        self.assertEqual(graph["deal_info"]["total_commitment"], 250000000)
+        self.assertTrue(any(node["id"] == "applicable_margin_bps" for node in graph["nodes"]))
+        self.assertTrue(any(node["id"] == "revolving_loan_interest_rate" for node in graph["nodes"]))
+        self.assertTrue(any(spec["param_id"] == "term_sofr_rate" for spec in graph["input_specs"]))
+        self.assertTrue(
+            any(
+                edge["from"] == "applicable_margin_bps" and edge["to"] == "revolving_loan_interest_rate"
+                for edge in graph["edges"]
+            )
+        )
+        self.assertEqual(graph["extraction_metadata"]["total_nodes"], len(graph["nodes"]))
 
     def test_no_doc_map_returns_skipped_consistency(self) -> None:
         tool = ExtractFinanceSignalsTool()
