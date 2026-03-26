@@ -113,22 +113,110 @@ def _build_source(doc_map: dict[str, Any], anchor: str, fallback: str) -> str:
     return f"Section {section_no} — {title}"
 
 
+def _parse_natural_date(raw: str) -> str | None:
+    cleaned = raw.strip().rstrip(".")
+    for fmt in ("%B %d, %Y", "%b %d, %Y", "%Y-%m-%d"):
+        try:
+            return dt.datetime.strptime(cleaned, fmt).date().isoformat()
+        except ValueError:
+            continue
+    return None
+
+
+def _extract_node_refs(value: Any, known_node_ids: set[str]) -> set[str]:
+    refs: set[str] = set()
+    if isinstance(value, str):
+        if value in known_node_ids:
+            refs.add(value)
+        return refs
+    if isinstance(value, list):
+        for item in value:
+            refs.update(_extract_node_refs(item, known_node_ids))
+        return refs
+    if isinstance(value, dict):
+        for item in value.values():
+            refs.update(_extract_node_refs(item, known_node_ids))
+    return refs
+
+
+def _normalize_relops(value: str) -> str:
+    return (
+        value.replace("≥", ">=")
+        .replace("≤", "<=")
+        .replace("–", "-")
+        .replace("—", "-")
+        .replace("−", "-")
+    )
+
+
+def _roman_to_int(value: str) -> int | None:
+    roman = {"I": 1, "V": 5, "X": 10}
+    total = 0
+    prev = 0
+    text = value.upper().strip()
+    if not text:
+        return None
+    for char in reversed(text):
+        current = roman.get(char)
+        if current is None:
+            return None
+        if current < prev:
+            total -= current
+        else:
+            total += current
+            prev = current
+    return total or None
+
+
 class ExtractCreditAgreementGraphTool:
     name = "extract_credit_agreement_graph"
 
     def _deal_info(self, text: str) -> dict[str, Any]:
-        maturity_match = re.search(r'"Maturity Date"\s+means\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})', text)
+        effective_match = re.search(
+            r'(?:"Effective Date"|Closing Date)\s+means\s+([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})',
+            text,
+        )
+        if not effective_match:
+            effective_match = re.search(r"dated\s+as\s+of\s+([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})", text, re.IGNORECASE)
         borrower_match = re.search(r"\b([A-Z][A-Za-z0-9&.,' -]+?)\s+(?:as\s+)?Borrower\b", text)
+        agent_match = re.search(r"\b([A-Z][A-Za-z0-9&.,' -]+?)\s+as\s+(?:the\s+)?(?:Administrative\s+)?Agent\b", text)
+        maturity_match = re.search(
+            r'"Maturity Date"\s+means\s+([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})',
+            text,
+        )
         total_commitment = _parse_money_to_number(text) or 0
+        amendment_history: list[dict[str, str]] = []
+        for match in re.finditer(
+            r"(Amendment No\.\s*\d+).*?(?:dated|effective)\s+(?:as of\s+)?([A-Za-z]+\s+\d{1,2},\s+\d{4}|\d{4}-\d{2}-\d{2})",
+            text,
+            re.IGNORECASE | re.DOTALL,
+        ):
+            amendment_history.append(
+                {
+                    "amendment": match.group(1).strip(),
+                    "date": _parse_natural_date(match.group(2)) or match.group(2).strip(),
+                    "summary": "Parsed from amendment reference in provided text.",
+                }
+            )
         return {
             "borrower": borrower_match.group(1).strip() if borrower_match else "Borrower",
             "facility_type": "revolving_credit" if "revolving" in text.lower() else "unknown",
             "total_commitment": total_commitment,
-            "effective_date": None,
-            "maturity_date": maturity_match.group(1) if maturity_match else None,
-            "agent": None,
-            "amendment_history": [],
+            "effective_date": _parse_natural_date(effective_match.group(1)) if effective_match else None,
+            "maturity_date": _parse_natural_date(maturity_match.group(1)) if maturity_match else None,
+            "agent": agent_match.group(1).strip() if agent_match else None,
+            "amendment_history": amendment_history,
         }
+
+    def _upsert_node(self, nodes: list[dict[str, Any]], node: dict[str, Any]) -> None:
+        for idx, existing in enumerate(nodes):
+            if existing["id"] == node["id"]:
+                nodes[idx] = node
+                return
+        nodes.append(node)
+
+    def _find_node(self, nodes: list[dict[str, Any]], node_id: str) -> dict[str, Any] | None:
+        return next((node for node in nodes if node["id"] == node_id), None)
 
     def _append_input_spec(
         self,
@@ -158,14 +246,226 @@ class ExtractCreditAgreementGraphTool:
             }
         )
 
-    def run(self, text: str, doc_map: dict[str, Any]) -> dict[str, Any]:
-        nodes: list[dict[str, Any]] = []
-        input_specs: list[dict[str, Any]] = []
-        edges: list[dict[str, str]] = []
-        low_confidence_nodes: list[str] = []
-        missing_references: list[str] = []
-        assumptions: list[str] = []
+    def _anchors_in_order(self, doc_map: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+        rows = list(doc_map.get("anchors", {}).items())
+        rows.sort(key=lambda item: (int(item[1].get("page", 0)), int(item[1].get("block", 0))))
+        return rows
 
+    def _append_metric_input(
+        self,
+        input_specs: list[dict[str, Any]],
+        *,
+        param_id: str,
+        source: str,
+        label: str,
+        unit: str,
+        description: str,
+        frequency: str = "Event-driven",
+        source_type: str = "Credit Agreement",
+        staleness_threshold_days: int | None = None,
+    ) -> None:
+        self._append_input_spec(
+            input_specs,
+            param_id=param_id,
+            label=label,
+            source_type=source_type,
+            frequency=frequency,
+            unit=unit,
+            description=description,
+            defined_in=source,
+            staleness_threshold_days=staleness_threshold_days,
+        )
+
+    def _condition_from_ratio_text(self, raw: str) -> str | None:
+        text = _normalize_relops(raw.lower())
+        patterns = [
+            (r"greater than or equal to\s+(\d+(?:\.\d+)?)", ">="),
+            (r"at least\s+(\d+(?:\.\d+)?)", ">="),
+            (r">=\s*(\d+(?:\.\d+)?)", ">="),
+            (r"greater than\s+(\d+(?:\.\d+)?)", ">"),
+            (r">\s*(\d+(?:\.\d+)?)", ">"),
+            (r"less than or equal to\s+(\d+(?:\.\d+)?)", "<="),
+            (r"<=\s*(\d+(?:\.\d+)?)", "<="),
+            (r"less than\s+(\d+(?:\.\d+)?)", "<"),
+            (r"<\s*(\d+(?:\.\d+)?)", "<"),
+        ]
+        for pattern, operator in patterns:
+            match = re.search(pattern, text)
+            if match:
+                return f"{operator} {match.group(1)}"
+        return None
+
+    def _metric_node_id(self, header: str) -> str | None:
+        normalized = _to_snake_case(header)
+        mapping = {
+            "applicable_margin": "applicable_margin_bps",
+            "term_benchmark_spread": "term_benchmark_spread_bps",
+            "rfr_spread": "rfr_spread_bps",
+            "abr_spread": "abr_spread_bps",
+            "base_rate_spread": "base_rate_spread_bps",
+            "commitment_fee": "commitment_fee_bps",
+            "commitment_fee_rate": "commitment_fee_bps",
+            "letter_of_credit_fee": "letter_of_credit_fee_bps",
+        }
+        for key, value in mapping.items():
+            if key in normalized:
+                return value
+        if "margin" in normalized:
+            return f"{normalized}_bps"
+        if "spread" in normalized:
+            return f"{normalized}_bps"
+        if "fee" in normalized:
+            return f"{normalized}_bps"
+        return None
+
+    def _parse_grid_tables(
+        self,
+        text: str,
+        doc_map: dict[str, Any],
+        nodes: list[dict[str, Any]],
+        input_specs: list[dict[str, Any]],
+        assumptions: list[str],
+    ) -> None:
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        for idx, line in enumerate(lines):
+            if "|" not in line:
+                continue
+            header_cells = [cell.strip() for cell in line.split("|") if cell.strip()]
+            if len(header_cells) < 2:
+                continue
+            if "leverage ratio" not in header_cells[0].lower():
+                continue
+            metric_columns: list[tuple[int, str, str]] = []
+            for col_idx, header in enumerate(header_cells[1:], start=1):
+                node_id = self._metric_node_id(header)
+                if node_id:
+                    metric_columns.append((col_idx, header, node_id))
+            if not metric_columns:
+                continue
+
+            rows: list[dict[str, Any]] = []
+            cursor = idx + 1
+            while cursor < len(lines) and "|" in lines[cursor]:
+                cells = [cell.strip() for cell in lines[cursor].split("|") if cell.strip()]
+                if len(cells) >= len(header_cells):
+                    rows.append({"ratio": cells[0], "values": cells[1:]})
+                cursor += 1
+            if not rows:
+                continue
+
+            source_line = line
+            anchor = next(
+                (
+                    anchor_name
+                    for anchor_name, row in self._anchors_in_order(doc_map)
+                    if source_line in str(row.get("text", "")) or str(row.get("text", "")) in source_line
+                ),
+                "",
+            )
+            source = _build_source(doc_map=doc_map, anchor=anchor, fallback=source_line)
+            self._append_metric_input(
+                input_specs,
+                param_id="total_leverage_ratio",
+                source=source,
+                label="Total Leverage Ratio",
+                source_type="Compliance Certificate",
+                frequency="Quarterly",
+                unit="ratio",
+                description="Most recently tested leverage ratio used to select the pricing level.",
+                staleness_threshold_days=90,
+            )
+
+            for col_idx, header, node_id in metric_columns:
+                table: list[dict[str, Any]] = []
+                for row in rows:
+                    if len(row["values"]) < col_idx:
+                        continue
+                    condition = self._condition_from_ratio_text(row["ratio"])
+                    value_bps = _pct_to_bps(row["values"][col_idx - 1])
+                    if not condition or value_bps is None:
+                        continue
+                    label_match = re.search(r"(category|level)\s+([ivx]+|\d+)", row["ratio"], re.IGNORECASE)
+                    label = label_match.group(0) if label_match else row["ratio"]
+                    table.append({"condition": condition, "value": value_bps, "label": label})
+                if not table:
+                    continue
+                self._upsert_node(
+                    nodes,
+                    {
+                        "id": node_id,
+                        "type": "LOOKUP",
+                        "config": {"input": "total_leverage_ratio", "table": table},
+                        "source": source,
+                        "output_unit": "bps",
+                        "notes": f'Parsed pricing grid for "{header}".',
+                    },
+                )
+
+            initial_line = next(
+                (
+                    candidate
+                    for candidate in lines[idx: min(len(lines), cursor + 5)]
+                    if "until the first adjustment date" in candidate.lower() and "level" in candidate.lower()
+                ),
+                None,
+            )
+            if initial_line:
+                level_match = re.search(r"level\s+([ivx]+|\d+)", initial_line, re.IGNORECASE)
+                margin_node = self._find_node(nodes, "applicable_margin_bps")
+                if level_match and margin_node and margin_node["type"] == "LOOKUP":
+                    level = level_match.group(0).lower()
+                    initial_row = next(
+                        (row for row in margin_node["config"]["table"] if str(row.get("label", "")).lower() == level),
+                        None,
+                    )
+                    if not initial_row:
+                        level_index = _roman_to_int(level_match.group(1)) if not level_match.group(1).isdigit() else int(level_match.group(1))
+                        if level_index and 1 <= level_index <= len(margin_node["config"]["table"]):
+                            initial_row = margin_node["config"]["table"][level_index - 1]
+                    if initial_row:
+                        self._upsert_node(
+                            nodes,
+                            {
+                                "id": "initial_applicable_margin_bps",
+                                "type": "CONSTANT",
+                                "config": {"value": initial_row["value"]},
+                                "source": source,
+                                "output_unit": "bps",
+                                "notes": "Initial pricing level parsed from the temporary period clause.",
+                            },
+                        )
+                        self._append_metric_input(
+                            input_specs,
+                            param_id="first_adjustment_date",
+                            source=source,
+                            label="First Adjustment Date",
+                            unit="date",
+                            description="Date when initial pricing ceases and the leverage-ratio grid controls.",
+                        )
+                        self._upsert_node(
+                            nodes,
+                            {
+                                "id": "applicable_margin_bps_initial_period",
+                                "type": "DATE_GATE",
+                                "config": {
+                                    "input": "initial_applicable_margin_bps",
+                                    "active_from": self._deal_info(text).get("effective_date") or "closing_date",
+                                    "active_until": "first_adjustment_date",
+                                    "when_inactive": "applicable_margin_bps",
+                                },
+                                "source": source,
+                                "output_unit": "bps",
+                                "notes": "Initial pricing applies until the first adjustment date.",
+                            },
+                        )
+                    else:
+                        assumptions.append(f"Could not map {level_match.group(0)} to a row in the Applicable Margin grid.")
+
+    def _extract_definition_nodes(
+        self,
+        doc_map: dict[str, Any],
+        nodes: list[dict[str, Any]],
+    ) -> None:
         for definition in doc_map.get("definitions", []):
             term = str(definition.get("term", ""))
             definition_text = str(definition.get("text", ""))
@@ -180,15 +480,17 @@ class ExtractCreditAgreementGraphTool:
                 bps = _pct_to_bps(definition_text)
                 if bps is None:
                     continue
-                nodes.append(
+                node_id = self._metric_node_id(term) or f"{term_snake}_bps"
+                self._upsert_node(
+                    nodes,
                     {
-                        "id": f"{term_snake}_bps",
+                        "id": node_id,
                         "type": "CONSTANT",
                         "config": {"value": bps},
                         "source": source,
                         "output_unit": "bps",
                         "notes": f'Parsed from definition text for "{term}".',
-                    }
+                    },
                 )
                 continue
 
@@ -196,7 +498,8 @@ class ExtractCreditAgreementGraphTool:
                 pct = _parse_percent_value(definition_text)
                 if pct is None:
                     continue
-                nodes.append(
+                self._upsert_node(
+                    nodes,
                     {
                         "id": f"{term_snake}_pct",
                         "type": "CONSTANT",
@@ -204,58 +507,229 @@ class ExtractCreditAgreementGraphTool:
                         "source": source,
                         "output_unit": "pct",
                         "notes": f'Parsed from definition text for "{term}".',
-                    }
+                    },
                 )
 
-        for anchor, row in doc_map.get("anchors", {}).items():
+    def _extract_base_rate_nodes(
+        self,
+        doc_map: dict[str, Any],
+        nodes: list[dict[str, Any]],
+        input_specs: list[dict[str, Any]],
+    ) -> str | None:
+        base_rate_node_or_param: str | None = None
+        for anchor, row in self._anchors_in_order(doc_map):
             line = str(row.get("text", ""))
-            lower = line.lower()
+            lower = _normalize_relops(line.lower())
             source = _build_source(doc_map=doc_map, anchor=anchor, fallback=line[:80])
 
-            if "interest rate" in lower and "plus applicable margin" in lower:
-                margin_node = next((node["id"] for node in nodes if node["id"] == "applicable_margin_bps"), None)
-                if not margin_node:
-                    assumptions.append("Skipped rate formula because Applicable Margin constant was not extracted.")
-                    continue
-                base_rate_param = "term_sofr_rate"
-                self._append_input_spec(
+            if "term sofr" in lower:
+                base_rate_node_or_param = "term_sofr_rate"
+                self._append_metric_input(
                     input_specs,
-                    param_id=base_rate_param,
+                    param_id="term_sofr_rate",
+                    source=source,
                     label="Term SOFR Rate",
                     source_type="Bloomberg",
                     frequency="Daily",
                     unit="pct",
                     description="Observed benchmark base rate used for floating-rate loans.",
-                    defined_in=source,
                     staleness_threshold_days=1,
                 )
-                rate_node_id = "revolving_loan_interest_rate"
-                nodes.append(
-                    {
-                        "id": rate_node_id,
-                        "type": "RATE_CALC",
-                        "config": {"base_rate": base_rate_param, "input": margin_node},
-                        "source": source,
-                        "output_unit": "pct",
-                        "notes": "Interest clause combines the floating benchmark with Applicable Margin.",
-                    }
+                floor_match = re.search(r"term sofr.*?(?:not be less than|floor of)\s+(\d+(?:\.\d+)?)\s*%", lower)
+                if floor_match:
+                    self._upsert_node(
+                        nodes,
+                        {
+                            "id": "term_sofr_rate_floor",
+                            "type": "FLOOR",
+                            "config": {"input": "term_sofr_rate", "floor_value": round(float(floor_match.group(1)) / 100, 6)},
+                            "source": source,
+                            "output_unit": "pct",
+                            "notes": "Base-rate floor parsed from interest benchmark clause.",
+                        },
+                    )
+                    base_rate_node_or_param = "term_sofr_rate_floor"
+                cap_match = re.search(r"term sofr.*?(?:not exceed|cap of)\s+(\d+(?:\.\d+)?)\s*%", lower)
+                if cap_match:
+                    input_ref = base_rate_node_or_param or "term_sofr_rate"
+                    self._upsert_node(
+                        nodes,
+                        {
+                            "id": "term_sofr_rate_cap",
+                            "type": "CAP",
+                            "config": {"input": input_ref, "cap_value": round(float(cap_match.group(1)) / 100, 6)},
+                            "source": source,
+                            "output_unit": "pct",
+                            "notes": "Base-rate cap parsed from interest benchmark clause.",
+                        },
+                    )
+                    base_rate_node_or_param = "term_sofr_rate_cap"
+        return base_rate_node_or_param
+
+    def _extract_overlay_and_reference_nodes(
+        self,
+        doc_map: dict[str, Any],
+        nodes: list[dict[str, Any]],
+        input_specs: list[dict[str, Any]],
+        assumptions: list[str],
+    ) -> str:
+        current_margin_ref = "applicable_margin_bps_initial_period" if self._find_node(nodes, "applicable_margin_bps_initial_period") else "applicable_margin_bps"
+        if not self._find_node(nodes, current_margin_ref):
+            return current_margin_ref
+
+        for anchor, row in self._anchors_in_order(doc_map):
+            line = str(row.get("text", ""))
+            lower = line.lower()
+            source = _build_source(doc_map=doc_map, anchor=anchor, fallback=line[:80])
+
+            if "event of default" in lower and "increased by" in lower and "applicable margin" in lower:
+                spread = _pct_to_bps(line)
+                if spread is None:
+                    continue
+                self._append_metric_input(
+                    input_specs,
+                    param_id="is_event_of_default",
+                    source=source,
+                    label="Event of Default Active",
+                    unit="bool",
+                    description="True while an Event of Default is continuing.",
+                    frequency="Event-driven",
+                    source_type="Loan Admin System",
                 )
-                edges.append({"from": margin_node, "to": rate_node_id})
-                continue
+                self._upsert_node(
+                    nodes,
+                    {
+                        "id": "default_interest_increment_bps",
+                        "type": "CONSTANT",
+                        "config": {"value": spread},
+                        "source": source,
+                        "output_unit": "bps",
+                        "notes": "Default-rate increment parsed from the event-of-default clause.",
+                    },
+                )
+                self._upsert_node(
+                    nodes,
+                    {
+                        "id": "defaulted_applicable_margin_bps",
+                        "type": "ARITHMETIC",
+                        "config": {
+                            "operands": [current_margin_ref, "default_interest_increment_bps"],
+                            "operator": "+",
+                        },
+                        "source": source,
+                        "output_unit": "bps",
+                        "notes": "Adds the default increment to the otherwise applicable margin.",
+                    },
+                )
+                self._upsert_node(
+                    nodes,
+                    {
+                        "id": "effective_applicable_margin_bps",
+                        "type": "CONDITIONAL",
+                        "config": {
+                            "condition": "is_event_of_default",
+                            "then": "defaulted_applicable_margin_bps",
+                            "else": current_margin_ref,
+                        },
+                        "source": source,
+                        "output_unit": "bps",
+                        "notes": "Applies default pricing only while an Event of Default is continuing.",
+                    },
+                )
+                current_margin_ref = "effective_applicable_margin_bps"
+
+            ref_match = re.search(
+                r"(letter of credit fee|lc fee|fronting fee).*?(?:equal to|same as)\s+the\s+([a-z][a-z\s]+?)(?:\.|,|$)",
+                lower,
+            )
+            if ref_match:
+                source_metric = self._metric_node_id(ref_match.group(2)) or _to_snake_case(ref_match.group(2))
+                if self._find_node(nodes, source_metric):
+                    target_id = self._metric_node_id(ref_match.group(1)) or f"{_to_snake_case(ref_match.group(1))}_bps"
+                    self._upsert_node(
+                        nodes,
+                        {
+                            "id": target_id,
+                            "type": "REFERENCE",
+                            "config": {"ref": source_metric},
+                            "source": source,
+                            "output_unit": "bps",
+                            "notes": f'Reference clause aliases "{ref_match.group(1)}" to "{ref_match.group(2)}".',
+                        },
+                    )
+                else:
+                    assumptions.append(f"Skipped reference for '{ref_match.group(1)}' because '{ref_match.group(2)}' was not extracted.")
 
             fee_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s+(?:per annum\s+)?commitment fee", line, re.IGNORECASE)
-            if fee_match:
-                node_id = "commitment_fee_bps"
-                nodes.append(
+            if fee_match and not self._find_node(nodes, "commitment_fee_bps"):
+                self._upsert_node(
+                    nodes,
                     {
-                        "id": node_id,
+                        "id": "commitment_fee_bps",
                         "type": "CONSTANT",
                         "config": {"value": int(round(float(fee_match.group(1)) * 100))},
                         "source": source,
                         "output_unit": "bps",
                         "notes": "Commitment fee parsed directly from clause text.",
-                    }
+                    },
                 )
+
+        return current_margin_ref
+
+    def _extract_rate_formula_nodes(
+        self,
+        doc_map: dict[str, Any],
+        nodes: list[dict[str, Any]],
+        margin_ref: str,
+        base_rate_ref: str | None,
+        assumptions: list[str],
+    ) -> None:
+        for anchor, row in self._anchors_in_order(doc_map):
+            line = str(row.get("text", ""))
+            lower = line.lower()
+            source = _build_source(doc_map=doc_map, anchor=anchor, fallback=line[:80])
+            if "interest rate" not in lower or "plus applicable margin" not in lower:
+                continue
+            if not self._find_node(nodes, margin_ref):
+                assumptions.append("Skipped rate formula because Applicable Margin was not extracted.")
+                continue
+            if not base_rate_ref:
+                assumptions.append("Skipped rate formula because base-rate input was not extracted.")
+                continue
+            self._upsert_node(
+                nodes,
+                {
+                    "id": "revolving_loan_interest_rate",
+                    "type": "RATE_CALC",
+                    "config": {"base_rate": base_rate_ref, "input": margin_ref},
+                    "source": source,
+                    "output_unit": "pct",
+                    "notes": "Interest clause combines the floating benchmark with the applicable spread.",
+                },
+            )
+
+    def run(self, text: str, doc_map: dict[str, Any]) -> dict[str, Any]:
+        nodes: list[dict[str, Any]] = []
+        input_specs: list[dict[str, Any]] = []
+        low_confidence_nodes: list[str] = []
+        missing_references: list[str] = []
+        assumptions: list[str] = []
+        self._extract_definition_nodes(doc_map=doc_map, nodes=nodes)
+        self._parse_grid_tables(text=text, doc_map=doc_map, nodes=nodes, input_specs=input_specs, assumptions=assumptions)
+        base_rate_ref = self._extract_base_rate_nodes(doc_map=doc_map, nodes=nodes, input_specs=input_specs)
+        margin_ref = self._extract_overlay_and_reference_nodes(
+            doc_map=doc_map,
+            nodes=nodes,
+            input_specs=input_specs,
+            assumptions=assumptions,
+        )
+        self._extract_rate_formula_nodes(
+            doc_map=doc_map,
+            nodes=nodes,
+            margin_ref=margin_ref,
+            base_rate_ref=base_rate_ref,
+            assumptions=assumptions,
+        )
 
         xref_targets = {str(ref.get("target_text", "")).strip() for ref in doc_map.get("xrefs", [])}
         for target in sorted(t for t in xref_targets if t):
@@ -273,6 +747,17 @@ class ExtractCreditAgreementGraphTool:
                 continue
             seen_ids.add(node["id"])
             valid_nodes.append(node)
+
+        node_ids = {node["id"] for node in valid_nodes}
+        edges: list[dict[str, str]] = []
+        seen_edges: set[tuple[str, str]] = set()
+        for node in valid_nodes:
+            for ref in sorted(_extract_node_refs(node.get("config", {}), node_ids)):
+                key = (ref, node["id"])
+                if key in seen_edges:
+                    continue
+                seen_edges.add(key)
+                edges.append({"from": ref, "to": node["id"]})
 
         return {
             "deal_info": self._deal_info(text),
