@@ -82,18 +82,26 @@ def _find_section_for_anchor(doc_map: dict[str, Any], anchor: str) -> dict[str, 
     doc_id = anchor_row.get("doc_id")
     page = int(anchor_row.get("page", 0))
     block = int(anchor_row.get("block", 0))
-    candidates: list[tuple[int, dict[str, Any]]] = []
+    preceding: list[tuple[int, dict[str, Any]]] = []
+    following: list[tuple[int, dict[str, Any]]] = []
     for section in doc_map.get("sections", []):
         if section.get("doc_id") != doc_id:
             continue
         if not (int(section.get("page_start", page)) <= page <= int(section.get("page_end", page))):
             continue
-        distance = abs(block - int(section.get("block_start", block)))
-        candidates.append((distance, section))
-    if not candidates:
+        block_start = int(section.get("block_start", block))
+        distance = abs(block - block_start)
+        if block_start <= block:
+            preceding.append((distance, section))
+        else:
+            following.append((distance, section))
+    if preceding:
+        preceding.sort(key=lambda row: (row[0], -int(row[1].get("block_start", 0))))
+        return preceding[0][1]
+    if not following:
         return None
-    candidates.sort(key=lambda row: row[0])
-    return candidates[0][1]
+    following.sort(key=lambda row: (row[0], int(row[1].get("block_start", 0))))
+    return following[0][1]
 
 
 def _build_source(doc_map: dict[str, Any], anchor: str, fallback: str) -> str:
